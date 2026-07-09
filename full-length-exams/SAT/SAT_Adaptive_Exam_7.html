@@ -1,0 +1,836 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SYRA · SAT Adaptive Exam 7</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;1,8..60,400&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{--navy:#0D1B2A;--navy2:#152538;--navy3:#1E3550;--gold:#C9A84C;--gold2:#E8C56A;--teal:#2EC4B6;--white:#FFFFFF;--off:#F7F9FC;--gray1:#E2E8F0;--gray2:#A0AEC0;--gray3:#6B7A8D;--text:#1C2833;--text2:#2D3748;--green:#27AE60;--red:#E53E3E;--orange:#E67E22;}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Source Serif 4',serif;background:var(--navy);color:var(--text);min-height:100vh;overflow-x:hidden}
+.screen{display:none;min-height:100vh}.screen.active{display:flex;flex-direction:column}
+#welcome{background:var(--navy);align-items:center;justify-content:center;padding:40px 20px}
+.welcome-card{background:var(--navy2);border:1px solid var(--navy3);border-radius:20px;padding:52px 48px;max-width:600px;width:100%;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,.4)}
+.logo-mark{width:72px;height:72px;border-radius:50%;background:linear-gradient(135deg,var(--gold),var(--gold2));display:flex;align-items:center;justify-content:center;margin:0 auto 24px;font-family:'Playfair Display',serif;font-size:28px;color:var(--navy);font-weight:700}
+.welcome-card h1{font-family:'Playfair Display',serif;font-size:clamp(24px,4vw,34px);color:var(--white);margin-bottom:8px}
+.sub{color:var(--gold);font-size:13px;letter-spacing:2px;text-transform:uppercase;margin-bottom:32px;font-family:'JetBrains Mono',monospace}
+.info-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-bottom:32px}
+.info-cell{background:var(--navy3);border-radius:10px;padding:16px;text-align:center}
+.info-cell .val{font-family:'Playfair Display',serif;font-size:24px;color:var(--gold)}
+.info-cell .lab{font-size:11px;color:var(--gray2);text-transform:uppercase;letter-spacing:1px;margin-top:4px;font-family:'JetBrains Mono',monospace}
+.rules{background:var(--navy3);border-radius:10px;padding:16px 20px;margin-bottom:28px;text-align:left}
+.rules li{color:var(--gray2);font-size:13.5px;line-height:1.7;list-style:none;padding-left:16px;position:relative}
+.rules li::before{content:"·";position:absolute;left:0;color:var(--gold)}
+.btn-start{background:linear-gradient(135deg,var(--gold),var(--gold2));color:var(--navy);border:none;border-radius:50px;padding:16px 52px;font-size:16px;font-family:'Playfair Display',serif;font-weight:600;cursor:pointer;transition:all .2s;box-shadow:0 8px 24px rgba(201,168,76,.3)}
+.btn-start:hover{transform:translateY(-2px)}
+#mod-intro{background:var(--navy);align-items:center;justify-content:center;padding:40px 20px}
+.mod-card{background:var(--navy2);border:1px solid var(--navy3);border-radius:20px;padding:48px;max-width:520px;width:100%;text-align:center}
+.mod-badge{display:inline-block;background:var(--navy3);border:1px solid var(--gold);border-radius:50px;padding:6px 20px;font-size:11px;color:var(--gold);letter-spacing:2px;text-transform:uppercase;font-family:'JetBrains Mono',monospace;margin-bottom:20px}
+.mod-card h2{font-family:'Playfair Display',serif;font-size:28px;color:var(--white);margin-bottom:8px}
+.mod-card .mod-sub{color:var(--gray2);font-size:14px;margin-bottom:32px}
+.mod-details{display:flex;gap:16px;justify-content:center;margin-bottom:32px}
+.mod-det{background:var(--navy3);border-radius:10px;padding:14px 24px;text-align:center}
+.mod-det .dv{font-family:'Playfair Display',serif;font-size:22px;color:var(--gold)}
+.mod-det .dl{font-size:11px;color:var(--gray3);text-transform:uppercase;letter-spacing:1px;font-family:'JetBrains Mono',monospace}
+.calc-note{background:rgba(46,196,182,.08);border:1px solid rgba(46,196,182,.3);border-radius:8px;padding:10px 16px;font-size:13px;color:var(--teal);margin-bottom:24px}
+.domain-strip{display:flex;gap:6px;flex-wrap:wrap;justify-content:center;margin-bottom:28px}
+.domain-tag{font-size:10px;font-family:'JetBrains Mono',monospace;padding:4px 10px;border-radius:50px;border:1px solid var(--navy3);color:var(--gray2)}
+.domain-tag.reading{border-color:var(--gold);color:var(--gold)}
+.domain-tag.writing{border-color:var(--teal);color:var(--teal)}
+#exam{background:var(--off);flex-direction:column}
+.exam-header{background:var(--navy);padding:12px 24px;display:flex;align-items:center;gap:16px;position:sticky;top:0;z-index:100;box-shadow:0 2px 12px rgba(0,0,0,.25)}
+.mod-label{font-family:'Playfair Display',serif;font-size:14px;color:var(--white);font-weight:600;flex:1}
+.mod-label span{color:var(--gold);font-size:11px;display:block;font-family:'JetBrains Mono',monospace;font-weight:400;letter-spacing:1px;text-transform:uppercase;margin-top:2px}
+.timer-wrap{display:flex;align-items:center;gap:8px;background:var(--navy2);border-radius:8px;padding:8px 14px}
+.timer-val{font-family:'JetBrains Mono',monospace;font-size:18px;color:var(--white);min-width:58px;text-align:center}
+.timer-val.warn{color:#FC8181;animation:pulse 1s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.5}}
+.q-counter{font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--gray2)}
+.calc-btn{background:var(--teal);border:none;border-radius:8px;padding:8px 14px;color:var(--navy);font-size:12px;font-family:'JetBrains Mono',monospace;font-weight:500;cursor:pointer}
+.calc-btn.hidden{display:none!important}
+.exam-body{flex:1;display:flex;overflow:hidden}
+.q-panel{flex:1;padding:32px;overflow-y:auto;max-width:780px;margin:0 auto;width:100%}
+.domain-badge{display:inline-block;font-size:10px;font-family:'JetBrains Mono',monospace;padding:3px 10px;border-radius:50px;margin-bottom:10px;letter-spacing:1px;text-transform:uppercase}
+.domain-badge.reading{background:rgba(201,168,76,.1);color:var(--gold);border:1px solid rgba(201,168,76,.3)}
+.domain-badge.writing{background:rgba(46,196,182,.1);color:var(--teal);border:1px solid rgba(46,196,182,.3)}
+.q-number{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--gray3);text-transform:uppercase;letter-spacing:2px;margin-bottom:10px}
+.passage-box{background:var(--white);border-left:3px solid var(--gold);border-radius:0 8px 8px 0;padding:18px 20px;margin-bottom:20px;font-size:15px;line-height:1.8;color:var(--text2);box-shadow:0 2px 8px rgba(0,0,0,.06)}
+.t1-label{font-weight:600;color:var(--navy);display:block;margin-bottom:6px;font-size:11px;text-transform:uppercase;letter-spacing:1px;font-family:'JetBrains Mono',monospace}
+.t2-label{font-weight:600;color:var(--navy);display:block;margin-top:14px;margin-bottom:6px;font-size:11px;text-transform:uppercase;letter-spacing:1px;font-family:'JetBrains Mono',monospace}
+.notes-box{background:var(--white);border-left:3px solid var(--teal);border-radius:0 8px 8px 0;padding:16px 20px;margin-bottom:20px;font-size:14px;line-height:1.8;color:var(--text2)}
+.notes-box .notes-intro{font-style:italic;color:var(--gray3);margin-bottom:10px;font-size:13px}
+.notes-box ul{padding-left:18px}
+.notes-box ul li{margin-bottom:4px}
+.q-text{font-size:16px;line-height:1.65;color:var(--text);margin-bottom:20px;font-weight:600}
+.choices{display:flex;flex-direction:column;gap:10px;margin-bottom:28px}
+.choice-btn{background:var(--white);border:2px solid var(--gray1);border-radius:10px;padding:14px 18px;text-align:left;cursor:pointer;font-size:15px;font-family:'Source Serif 4',serif;color:var(--text2);line-height:1.5;transition:all .15s;display:flex;align-items:flex-start;gap:12px;width:100%}
+.choice-btn:hover{border-color:var(--gold);background:#FFFDF5}
+.choice-btn.selected{border-color:var(--gold);background:#FFFBEE;color:var(--navy)}
+.choice-letter{font-family:'JetBrains Mono',monospace;font-size:12px;min-width:22px;height:22px;border-radius:50%;background:var(--gray1);display:flex;align-items:center;justify-content:center;margin-top:1px;flex-shrink:0}
+.choice-btn.selected .choice-letter{background:var(--gold);color:var(--navy)}
+.nav-row{display:flex;align-items:center;gap:12px;padding-top:8px;flex-wrap:wrap}
+.btn-nav{border:none;border-radius:8px;padding:12px 24px;font-size:14px;cursor:pointer;transition:all .15s;font-family:'Source Serif 4',serif}
+.btn-prev{background:var(--gray1);color:var(--gray3)}.btn-prev:hover{background:var(--gray2);color:var(--white)}
+.btn-next{background:var(--navy);color:var(--white)}.btn-next:hover{background:var(--navy3)}
+.btn-submit-mod{background:linear-gradient(135deg,var(--gold),var(--gold2));color:var(--navy);font-weight:600}
+.flag-btn{background:none;border:2px solid var(--gray1);border-radius:8px;padding:10px 16px;font-size:13px;color:var(--gray3);cursor:pointer;transition:all .15s;margin-left:auto}
+.flag-btn.flagged{border-color:var(--orange);color:var(--orange);background:rgba(230,126,34,.06)}
+.palette-panel{width:190px;background:var(--white);border-left:1px solid var(--gray1);padding:18px;overflow-y:auto;flex-shrink:0}
+.palette-panel h4{font-size:11px;color:var(--gray3);text-transform:uppercase;letter-spacing:1.5px;margin-bottom:12px;font-family:'JetBrains Mono',monospace}
+.palette-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:4px;margin-bottom:16px}
+.pal-btn{aspect-ratio:1;border:2px solid var(--gray1);border-radius:6px;background:var(--white);font-size:11px;cursor:pointer;font-family:'JetBrains Mono',monospace;transition:all .12s;display:flex;align-items:center;justify-content:center}
+.pal-btn.answered{background:var(--navy);border-color:var(--navy);color:var(--white)}
+.pal-btn.current{border-color:var(--gold)!important;box-shadow:0 0 0 2px var(--gold)}
+.pal-btn.flagged{background:rgba(230,126,34,.1);border-color:var(--orange);color:var(--orange)}
+.palette-legend{display:flex;flex-direction:column;gap:5px}
+.leg-row{display:flex;align-items:center;gap:7px;font-size:11px;color:var(--gray3)}
+.leg-dot{width:11px;height:11px;border-radius:3px;flex-shrink:0;border:2px solid transparent}
+.calc-overlay{display:none;position:fixed;bottom:24px;right:24px;z-index:500;background:var(--white);border-radius:12px;box-shadow:0 12px 40px rgba(0,0,0,.3);overflow:hidden;width:380px;height:460px}
+.calc-overlay.open{display:block}
+.calc-header{background:var(--navy);padding:10px 14px;display:flex;justify-content:space-between;align-items:center}
+.calc-header span{color:var(--gold);font-size:12px;font-family:'JetBrains Mono',monospace;letter-spacing:1px}
+.calc-close{background:none;border:none;color:var(--gray2);font-size:20px;cursor:pointer}
+.calc-overlay iframe{width:100%;height:408px;border:none}
+#review{background:var(--navy);align-items:center;justify-content:center;padding:40px 20px}
+.review-card{background:var(--navy2);border:1px solid var(--navy3);border-radius:20px;padding:40px;max-width:560px;width:100%}
+.review-card h2{font-family:'Playfair Display',serif;font-size:24px;color:var(--white);margin-bottom:6px}
+.review-card .rsub{color:var(--gray2);font-size:13px;margin-bottom:24px}
+.review-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:24px}
+.rstat{background:var(--navy3);border-radius:8px;padding:14px;text-align:center}
+.rstat .rv{font-family:'Playfair Display',serif;font-size:22px;color:var(--gold)}
+.rstat .rl{font-size:11px;color:var(--gray3);text-transform:uppercase;letter-spacing:1px;font-family:'JetBrains Mono',monospace;margin-top:2px}
+.review-list{max-height:260px;overflow-y:auto;margin-bottom:24px;display:flex;flex-direction:column;gap:5px}
+.rev-item{display:flex;align-items:center;gap:10px;background:var(--navy3);border-radius:8px;padding:10px 14px;cursor:pointer;transition:background .15s}
+.rev-item:hover{background:var(--navy)}
+.ri-num{font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--gray2);min-width:28px}
+.ri-status{font-size:11px;padding:2px 8px;border-radius:50px}
+.ri-status.ans{background:rgba(39,174,96,.15);color:var(--green)}
+.ri-status.unans{background:rgba(229,62,62,.15);color:var(--red)}
+.ri-status.flag{background:rgba(230,126,34,.15);color:var(--orange)}
+.ri-text{font-size:13px;color:var(--gray2);flex:1;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
+.review-btns{display:flex;gap:12px}
+.btn-go-back{background:var(--navy3);color:var(--gray2);border:none;border-radius:8px;padding:12px 20px;font-size:14px;cursor:pointer;flex:1;font-family:'Source Serif 4',serif}
+.btn-confirm-submit{background:linear-gradient(135deg,var(--gold),var(--gold2));color:var(--navy);border:none;border-radius:8px;padding:12px 20px;font-size:14px;font-weight:600;cursor:pointer;flex:2;font-family:'Playfair Display',serif}
+#break-screen{background:var(--navy);align-items:center;justify-content:center;padding:40px}
+.break-card{background:var(--navy2);border:1px solid var(--navy3);border-radius:20px;padding:48px;max-width:480px;width:100%;text-align:center}
+.break-card h2{font-family:'Playfair Display',serif;font-size:28px;color:var(--white);margin-bottom:12px}
+.break-card p{color:var(--gray2);font-size:14px;line-height:1.7;margin-bottom:24px}
+.break-timer{font-family:'JetBrains Mono',monospace;font-size:52px;color:var(--gold);margin:16px 0}
+.break-sub{font-size:12px;color:var(--gray3);text-transform:uppercase;letter-spacing:2px;font-family:'JetBrains Mono',monospace;margin-bottom:32px}
+#results{background:var(--navy);padding:40px 20px;overflow-y:auto;align-items:flex-start;justify-content:center}
+.results-inner{max-width:720px;width:100%;margin:0 auto}
+.results-inner h1{font-family:'Playfair Display',serif;font-size:32px;color:var(--white);margin-bottom:6px}
+.res-sub{color:var(--gold);font-size:12px;letter-spacing:2px;text-transform:uppercase;font-family:'JetBrains Mono',monospace;margin-bottom:32px}
+.score-row{display:grid;grid-template-columns:repeat(2,1fr);gap:16px;margin-bottom:24px}
+.score-card{background:var(--navy2);border-radius:14px;padding:28px;text-align:center;border:1px solid var(--navy3)}
+.sc-label{font-size:11px;color:var(--gray3);text-transform:uppercase;letter-spacing:1.5px;font-family:'JetBrains Mono',monospace;margin-bottom:8px}
+.sc-val{font-family:'Playfair Display',serif;font-size:48px;color:var(--gold);line-height:1}
+.res-total-block{background:linear-gradient(135deg,var(--navy3),var(--navy2));border:1px solid var(--gold);border-radius:16px;padding:24px;text-align:center;margin-bottom:20px}
+.res-total-label{font-size:12px;color:var(--gray2);text-transform:uppercase;letter-spacing:2px;font-family:'JetBrains Mono',monospace;margin-bottom:6px}
+.res-total-val{font-family:'Playfair Display',serif;font-size:64px;color:var(--gold2);line-height:1}
+.res-total-sub{font-size:12px;color:var(--gray3);margin-top:4px;font-family:'JetBrains Mono',monospace}
+.res-caveat{margin:0 auto 20px;max-width:560px;padding:14px 18px;background:rgba(201,168,76,0.08);border-left:3px solid var(--gold);border-radius:0 10px 10px 0;font-size:13px;line-height:1.6;color:var(--gray1);text-align:left}
+.res-caveat strong{color:var(--gold2)}
+.sc-sub{font-size:12px;color:var(--gray3);margin-top:6px}
+.section-scores{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:28px}
+.sscore{background:var(--navy2);border-radius:10px;padding:16px;text-align:center;border:1px solid var(--navy3)}
+.sscore .sv{font-family:'Playfair Display',serif;font-size:22px;color:var(--gold)}
+.sscore .sl{font-size:10px;color:var(--gray3);text-transform:uppercase;letter-spacing:1px;font-family:'JetBrains Mono',monospace;margin-top:4px}
+.review-section{background:var(--navy2);border-radius:14px;padding:24px;margin-bottom:16px;border:1px solid var(--navy3)}
+.review-section h3{font-family:'Playfair Display',serif;font-size:18px;color:var(--white);margin-bottom:16px;display:flex;justify-content:space-between;align-items:center}
+.rs-score{font-family:'JetBrains Mono',monospace;font-size:13px;color:var(--gold)}
+.ans-item{display:flex;align-items:flex-start;gap:12px;padding:12px 0;border-bottom:1px solid var(--navy3)}
+.ans-item:last-child{border-bottom:none}
+.ans-icon{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0;margin-top:2px;font-weight:700}
+.ans-icon.correct{background:rgba(39,174,96,.15);color:var(--green)}
+.ans-icon.wrong{background:rgba(229,62,62,.15);color:var(--red)}
+.ans-icon.skip{background:rgba(160,174,192,.15);color:var(--gray3)}
+.ans-text{flex:1}
+.at-q{font-size:13px;color:var(--gray2);margin-bottom:4px;line-height:1.5}
+.at-r{font-size:12px;font-family:'JetBrains Mono',monospace}
+.at-r .cor{color:var(--green)}.at-r .wr{color:var(--red)}
+.skill-breakdown{display:flex;flex-wrap:wrap;gap:7px;margin-top:16px;padding-top:12px;border-top:1px solid var(--navy3)}
+.skill-pill{background:var(--navy3);border-radius:50px;padding:5px 12px;font-size:11px;font-family:'JetBrains Mono',monospace;color:var(--gray2)}
+.skill-pill span{color:var(--gold);font-weight:500}
+.btn-restart{display:block;width:100%;background:linear-gradient(135deg,var(--gold),var(--gold2));color:var(--navy);border:none;border-radius:10px;padding:16px;font-size:16px;font-family:'Playfair Display',serif;font-weight:600;cursor:pointer;margin-top:24px}
+@media(max-width:640px){.palette-panel{display:none}.welcome-card,.mod-card,.break-card,.review-card{padding:28px 20px}.info-grid{grid-template-columns:1fr 1fr}.section-scores{grid-template-columns:repeat(2,1fr)}.score-row{grid-template-columns:1fr 1fr}.exam-header{padding:10px 14px;gap:8px}.q-panel{padding:18px 16px}.calc-overlay{width:calc(100vw - 20px);right:10px}}
+</style>
+</head>
+<body>
+
+<div id="welcome" class="screen active">
+  <div class="welcome-card">
+    <div class="logo-mark">S</div>
+    <h1>SAT Adaptive Exam</h1>
+    <div class="sub">Syra Verbal Intelligence</div>
+    <div class="info-grid">
+      <div class="info-cell"><div class="val">4</div><div class="lab">Modules</div></div>
+      <div class="info-cell"><div class="val">98</div><div class="lab">Questions</div></div>
+      <div class="info-cell"><div class="val">2h 24m</div><div class="lab">Total Time</div></div>
+      <div class="info-cell"><div class="val">400–1600</div><div class="lab">Score Range</div></div>
+    </div>
+    <ul class="rules">
+      <li>R&amp;W: 27 questions per module · 32 min each · Question order matches real SAT</li>
+      <li>Math: 22 questions per module · 35 min each</li>
+      <li>Module 2 difficulty adapts to your Module 1 score</li>
+      <li>Calculator available in Math Module 2 only</li>
+      <li>Flag questions to revisit · Timer auto-submits on expiry</li>
+    </ul>
+    <div style="margin:16px 0 8px">
+      <input id="student-name" type="text" placeholder="Enter your name before starting"
+        style="width:100%;max-width:340px;padding:10px 14px;border:1.5px solid #c8b97a;
+               border-radius:8px;font-size:15px;font-family:inherit;outline:none;
+               background:#fffdf4;color:#1a1a2e;box-sizing:border-box;"
+        onkeydown="if(event.key==='Enter')startExam()"/>
+    </div>
+    <button class="btn-start" onclick="startExam()">Begin Exam</button>
+  </div>
+</div>
+
+<div id="mod-intro" class="screen">
+  <div class="mod-card">
+    <div class="mod-badge" id="mi-badge">Module 1 of 4</div>
+    <h2 id="mi-title">Reading &amp; Writing</h2>
+    <div class="mod-sub" id="mi-sub">Module 1</div>
+    <div class="mod-details">
+      <div class="mod-det"><div class="dv" id="mi-qs">27</div><div class="dl">Questions</div></div>
+      <div class="mod-det"><div class="dv" id="mi-time">32 min</div><div class="dl">Time Limit</div></div>
+    </div>
+    <div id="mi-domain-strip" class="domain-strip"></div>
+    <div class="calc-note" id="mi-calc-note" style="display:none">📐 Calculator (Desmos) available this module</div>
+    <button class="btn-start" onclick="beginModule()">Start Module</button>
+  </div>
+</div>
+
+<div id="exam" class="screen">
+  <div class="exam-header">
+    <div class="mod-label" id="hdr-label">Reading &amp; Writing<span id="hdr-sub">MODULE 1</span></div>
+    <div class="q-counter" id="hdr-qcount">1 / 27</div>
+    <button class="calc-btn hidden" id="calc-toggle-btn" onclick="toggleCalc()">⊞ Calc</button>
+    <div class="timer-wrap">
+      <span style="color:var(--gold);font-size:13px">⏱</span>
+      <span class="timer-val" id="timer-display">32:00</span>
+    </div>
+  </div>
+  <div class="exam-body">
+    <div class="q-panel" id="q-panel"></div>
+    <div class="palette-panel">
+      <h4>Questions</h4>
+      <div class="palette-grid" id="palette-grid"></div>
+      <div class="palette-legend">
+        <div class="leg-row"><div class="leg-dot" style="background:var(--navy);border-color:var(--navy)"></div>Answered</div>
+        <div class="leg-row"><div class="leg-dot" style="background:var(--white);border-color:var(--gray1)"></div>Unanswered</div>
+        <div class="leg-row"><div class="leg-dot" style="background:rgba(230,126,34,.15);border-color:var(--orange)"></div>Flagged</div>
+        <div class="leg-row"><div class="leg-dot" style="border-color:var(--gold)"></div>Current</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="review" class="screen">
+  <div class="review-card">
+    <h2>Review Before Submitting</h2>
+    <div class="rsub" id="rev-sub">Module 1</div>
+    <div class="review-stats">
+      <div class="rstat"><div class="rv" id="rev-answered">0</div><div class="rl">Answered</div></div>
+      <div class="rstat"><div class="rv" id="rev-unanswered">0</div><div class="rl">Skipped</div></div>
+      <div class="rstat"><div class="rv" id="rev-flagged">0</div><div class="rl">Flagged</div></div>
+    </div>
+    <div class="review-list" id="review-list"></div>
+    <div class="review-btns">
+      <button class="btn-go-back" onclick="goBackToExam()">← Return</button>
+      <button class="btn-confirm-submit" onclick="confirmSubmitModule()">Submit Module →</button>
+    </div>
+  </div>
+</div>
+
+<div id="break-screen" class="screen">
+  <div class="break-card">
+    <h2>Section Break ✓</h2>
+    <p>Reading &amp; Writing complete.<br>Mathematics begins next.<br>You have 10 minutes.</p>
+    <div class="break-timer" id="break-timer">10:00</div>
+    <div class="break-sub">Break ends automatically</div>
+    <button class="btn-start" onclick="endBreak()">Skip Break →</button>
+  </div>
+</div>
+
+<div id="results" class="screen">
+  <div class="results-inner">
+    <h1>Exam Complete</h1>
+    <div class="res-sub">SAT Adaptive Exam · Syra Verbal Intelligence</div>
+    <div class="res-total-block">
+      <div class="res-total-label">TOTAL SCORE</div>
+      <div class="res-total-val" id="res-total">—</div>
+      <div class="res-total-sub">400–1600</div>
+    </div>
+    <div class="score-row">
+      <div class="score-card"><div class="sc-label">Reading &amp; Writing</div><div class="sc-val" id="res-verbal">—</div><div class="sc-sub">out of 800</div></div>
+      <div class="score-card"><div class="sc-label">Mathematics</div><div class="sc-val" id="res-math">—</div><div class="sc-sub">out of 800</div></div>
+    </div>
+    <div class="res-caveat" id="res-caveat">
+      This score is Syra's own estimate, not an official College Board score — the real SAT's exact scoring formula is confidential and isn't publicly available to any practice platform.
+      Based on patterns we've observed, your actual SAT score may fall in the range of <strong id="res-range">—</strong>.
+      Treat this as a directional guide for where you stand, not a precise prediction.
+    </div>
+    <div class="section-scores">
+      <div class="sscore"><div class="sv" id="res-v1">—</div><div class="sl">RW Mod 1</div></div>
+      <div class="sscore"><div class="sv" id="res-v2">—</div><div class="sl">RW Mod 2</div></div>
+      <div class="sscore"><div class="sv" id="res-m1">—</div><div class="sl">Math Mod 1</div></div>
+      <div class="sscore"><div class="sv" id="res-m2">—</div><div class="sl">Math Mod 2</div></div>
+    </div>
+    <div id="results-detail"></div>
+    <button class="btn-restart" onclick="location.reload()">Retake Exam</button>
+  </div>
+</div>
+
+<div class="calc-overlay" id="calc-overlay">
+  <div class="calc-header">
+    <span>DESMOS SCIENTIFIC CALCULATOR</span>
+    <button class="calc-close" onclick="toggleCalc()">✕</button>
+  </div>
+  <iframe src="https://www.desmos.com/scientific" title="Desmos" loading="lazy"></iframe>
+</div>
+
+<script>
+const VERBAL = [{"id": "ex7-t2-wic-e1", "type": "WIC", "d": 1, "passage": "The retiring professor was celebrated not only for her research but for her ______ approach to mentorship: she made time for every student, answered emails within hours, and remembered the names of all her advisees years after graduation.", "q": "Which word most logically and precisely completes the text?", "choices": ["indifferent", "conscientious", "impulsive", "detached"], "ans": 1}, {"id": "ex7-t2-wic-e2", "type": "WIC", "d": 1, "passage": "The coral reef, once a ______ ecosystem teeming with thousands of fish species, had been reduced to bleached white rubble by two decades of warming ocean temperatures.", "q": "Which word most logically and precisely completes the text?", "choices": ["desolate", "fragile", "vibrant", "uniform"], "ans": 2}, {"id": "ex7-t2-wic-e3", "type": "WIC", "d": 1, "passage": "The architect's new building was praised for its ______ design: rather than imposing a bold new aesthetic on the historic square, it echoed the proportions and materials of its 19th-century neighbours.", "q": "Which word most logically and precisely completes the text?", "choices": ["disruptive", "contextual", "minimalist", "experimental"], "ans": 1}, {"id": "ex7-t2-wic-m1", "type": "WIC", "d": 3, "passage": "The diplomat's remarks were notably ______ : rather than endorsing either side's position on the disputed territory, she acknowledged both nations' historical claims while stopping short of any declaration that could be interpreted as policy.", "q": "Which word most logically and precisely completes the text?", "choices": ["incendiary", "noncommittal", "conciliatory", "prescriptive"], "ans": 1}, {"id": "ex7-t2-wic-m2", "type": "WIC", "d": 3, "passage": "The novel's central narrative is ______ by dozens of footnotes, some running to several pages, in which the narrator interrupts his own story to contradict it, qualify it, or simply digress into unrelated observations.", "q": "Which word most logically and precisely completes the text?", "choices": ["supported", "disrupted", "amplified", "clarified"], "ans": 1}, {"id": "ex7-t2-wic-m3", "type": "WIC", "d": 3, "passage": "The company's decision to release the software ahead of schedule proved ______ : within weeks, critical bugs had been discovered by users, and the emergency patches required more engineering hours than the original product.", "q": "Which word most logically and precisely completes the text?", "choices": ["prudent", "counterproductive", "inevitable", "transparent"], "ans": 1}, {"id": "ex7-t2-wic-h1", "type": "WIC", "d": 5, "passage": "The historian described the emperor's administrative reforms as ______ in their ambition but ultimately incoherent in execution: the edicts multiplied, often contradicting one another, while the institutional capacity to implement them remained unchanged.", "q": "Which word most logically and precisely completes the text?", "choices": ["sweeping", "incremental", "pragmatic", "tentative"], "ans": 0}, {"id": "ex7-t2-wic-h2", "type": "WIC", "d": 5, "passage": "Critics noted that the study's conclusions were ______ : they rested on three contested premises, each of which had been challenged in peer-reviewed literature, yet the authors presented their findings as though the premises were settled.", "q": "Which word most logically and precisely completes the text?", "choices": ["provisional", "tendentious", "syllogistic", "overextended"], "ans": 3}, {"id": "ex7-t2-wic-h3", "type": "WIC", "d": 5, "passage": "The novelist's prose style has been described as ______ — every sentence is constructed with visible intentionality, as though each word had been weighed against dozens of alternatives before being chosen, which paradoxically creates an effect of effort rather than ease.", "q": "Which word most logically and precisely completes the text?", "choices": ["effortless", "laboured", "economical", "lyrical"], "ans": 1}, {"id": "ex7-t2-wic-m4", "type": "WIC", "d": 3, "passage": "The documentary's ______ approach — weaving together archival footage, expert commentary, and first-person testimony — gave viewers a sense of the events as simultaneously historical record and lived experience.", "q": "Which word most logically and precisely completes the text?", "choices": ["reductive", "adversarial", "multifaceted", "linear"], "ans": 2}, {"id": "ex7-t2-wic-e4", "type": "WIC", "d": 1, "passage": "The drought had ______ the once-fertile valley: where fields of wheat and barley had stretched to the horizon, cracked earth and dried riverbeds now extended as far as the eye could see.", "q": "Which word most logically and precisely completes the text?", "choices": ["enriched", "transformed", "preserved", "devastated"], "ans": 3}, {"id": "ex7-t2-wic-h4", "type": "WIC", "d": 5, "passage": "The committee's report was ______ in its treatment of the scandal — it documented events in exhaustive detail while scrupulously avoiding any assignment of responsibility, leaving readers with a comprehensive record of what happened but no guidance on accountability.", "q": "Which word most logically and precisely completes the text?", "choices": ["impartial", "exhaustive", "evasive", "judicious"], "ans": 2}, {"id": "ex7-t2-tsp-e1", "type": "TSP", "d": 1, "passage": "Monarch butterflies undertake one of the most extraordinary migrations in the animal kingdom. Each autumn, millions travel up to 4,500 kilometres from Canada and the United States to specific mountain forests in central Mexico. The same trees are used every year, yet no individual butterfly completes the round trip — the return journey is made by their great-grandchildren.", "q": "What is the main purpose of the text?", "choices": ["To argue that monarch butterflies are endangered", "To describe a remarkable migration and highlight its most surprising feature", "To compare monarch migration with that of other butterfly species", "To explain the scientific mechanism behind butterfly navigation"], "ans": 1}, {"id": "ex7-t2-tsp-e2", "type": "TSP", "d": 1, "passage": "The Great Wall of China is widely believed to be visible from space. This claim, however, is false. The wall is on average only about 5–8 metres wide — far too narrow to be seen from low Earth orbit, where the minimum visible width would need to be around 10 kilometres. Chinese astronaut Yang Liwei confirmed after his 2003 spaceflight that he could not see it.", "q": "Which choice best describes the overall structure of the text?", "choices": ["A scientific question is posed and then left unanswered", "A widely held belief is stated and then corrected with evidence", "Two competing scientific claims are compared and evaluated", "A historical achievement is celebrated and its significance explained"], "ans": 1}, {"id": "ex7-t2-tsp-e3", "type": "TSP", "d": 1, "passage": "From a 2023 urban planning report: \"Current zoning regulations require a minimum of 1.5 parking spaces per residential unit. This requirement was established in the 1960s, when car ownership rates were significantly higher relative to public transit availability. In neighbourhoods now served by frequent bus and rail lines, the mandate inflates construction costs, reduces housing density, and contradicts current sustainability goals.\"", "q": "The primary purpose of this excerpt is to", "choices": ["celebrate the history of urban parking policy", "present an outdated regulation and argue it should be reconsidered", "compare parking requirements across different cities", "describe how public transit has expanded since the 1960s"], "ans": 1}, {"id": "ex7-t2-tsp-m1", "type": "TSP", "d": 3, "passage": "Philosopher of science Karl Popper argued that a theory is scientific only if it makes predictions that could, in principle, be proven false. A theory that can accommodate any result by reinterpretation is not scientific but metaphysical. This criterion — falsifiability — has been enormously influential, though critics have noted that it excludes some widely accepted sciences, such as evolutionary biology, which makes many historical rather than predictive claims.", "q": "Which choice best describes the overall structure of the text?", "choices": ["A philosophical criterion is introduced, explained, and its limitation noted", "Two philosophers debate the nature of scientific knowledge", "A scientific theory is proposed and then tested against evidence", "The history of the philosophy of science is summarised chronologically"], "ans": 0}, {"id": "ex7-t2-tsp-m2", "type": "TSP", "d": 3, "passage": "Jazz improvisation is often described as spontaneous composition. While every performance is unique, improvisers do not create from nothing: they draw on internalised vocabularies of scales, modes, and melodic patterns accumulated through years of practice. What sounds like freedom is, paradoxically, the product of deep structural constraint — a musician must know the rules intimately before they can transcend them.", "q": "What is the main purpose of the text?", "choices": ["To argue that jazz improvisation is not truly musical", "To correct the impression that jazz improvisation is unconstrained by showing that it depends on deep structural knowledge", "To compare jazz improvisation with classical composition", "To explain how scales and modes are learned by jazz musicians"], "ans": 1}, {"id": "ex7-t2-tsp-m3", "type": "TSP", "d": 3, "passage": "Text 1: The introduction of the printing press in 15th-century Europe is typically credited with democratising knowledge by making books affordable and widely available for the first time.  Text 2: The democratisation thesis overstates the press's immediate impact. Literacy rates in 15th-century Europe were below 10%, and most printed material in the first decades was religious content directed at existing literate elites. The broad popular access we associate with print culture took centuries to develop.", "q": "How does Text 2 relate to the argument in Text 1?", "choices": ["It agrees with Text 1 but focuses on a different aspect of the printing press's impact", "It challenges the timeline implied in Text 1 by showing the democratisation was gradual, not immediate", "It refutes Text 1 entirely by proving the printing press had no democratising effect", "It introduces new evidence that supports Text 1's central claim"], "ans": 1}, {"id": "ex7-t2-tsp-h1", "type": "TSP", "d": 5, "passage": "The sentence \"Colourless green ideas sleep furiously\" was coined by linguist Noam Chomsky in 1957 to demonstrate that grammatical correctness and semantic meaning are independent properties of language. A sentence can be perfectly well-formed syntactically while remaining semantically nonsensical. Some philosophers have since questioned whether the sentence is truly meaningless, proposing interpretations in which \"colourless\" refers to cultural blandness and \"furiously\" to intense latent energy.", "q": "The function of the final sentence is to", "choices": ["refute Chomsky's claim about the independence of syntax and semantics", "show that Chomsky's example, while useful, has been complicated by subsequent interpretation", "present the dominant contemporary view of the sentence's meaning", "introduce a new grammatical rule extending Chomsky's original framework"], "ans": 1}, {"id": "ex7-t2-tsp-h2", "type": "TSP", "d": 5, "passage": "Economists distinguish between two types of unemployment: frictional, which occurs when workers are temporarily between jobs, and structural, which arises when skills no longer match available positions. Policy responses differ accordingly. Frictional unemployment responds to improved job-matching services; structural unemployment requires retraining programmes. A third category, cyclical unemployment, rises during recessions and falls during expansions, responding most directly to aggregate demand policy.", "q": "The primary purpose of the text is to", "choices": ["argue that cyclical unemployment is the most serious type", "present a taxonomy of unemployment types and connect each to appropriate policy", "explain why unemployment can never be fully eliminated", "criticise current government responses to unemployment"], "ans": 1}, {"id": "ex7-t2-ctc-e1", "type": "CT", "d": 1, "passage": "Text 1: Electric vehicles are the most significant development in personal transportation in a century. As battery costs fall and range improves, EVs will displace combustion engines within a generation.  Text 2: The EV transition is constrained by infrastructure rather than technology. Even if every new car sold tomorrow were electric, the charging network in most countries remains too sparse and too slow for long-distance travel to be practical for the majority of drivers.", "q": "Based on the texts, how would the author of Text 2 most likely respond to the claim in Text 1?", "choices": ["By arguing that combustion engines are superior to electric vehicles", "By agreeing EVs are important but cautioning that infrastructure limits will slow the predicted displacement", "By claiming battery costs have not actually fallen", "By questioning whether personal transportation will exist in a generation"], "ans": 1}, {"id": "ex7-t2-ctc-m1", "type": "CT", "d": 3, "passage": "Text 1: Children who grow up bilingual develop stronger executive function — the set of mental skills that includes attention control, cognitive flexibility, and working memory — than monolingual children. Regular practice switching between two linguistic systems strengthens the same cognitive processes used for other forms of mental task-switching.  Text 2: Meta-analyses of bilingualism research have found that the \"bilingual advantage\" in executive function is considerably smaller than originally reported and may reflect publication bias — studies finding a positive effect are more likely to be published than those finding no effect. Several large-scale replications have failed to find significant differences.", "q": "Which statement best describes the relationship between the two texts?", "choices": ["Text 2 confirms Text 1 with additional research", "Text 2 questions the reliability of the evidence behind Text 1's claim", "Text 2 argues bilingualism has no cognitive benefits at all", "Text 2 focuses on a different age group than Text 1"], "ans": 1}, {"id": "ex7-t2-ctc-h1", "type": "CT", "d": 5, "passage": "Text 1: The rise of large language models represents a qualitative shift in artificial intelligence. These systems do not merely retrieve stored information — they generate novel combinations of concepts, produce coherent extended reasoning, and demonstrate capabilities that emerge unpredictably as scale increases. Whether this constitutes understanding is a philosophical question, but the functional behaviour is genuinely new.  Text 2: What appears as novel reasoning in large language models is better understood as sophisticated interpolation within the distribution of their training data. These systems produce statistically plausible continuations of text; they do not model the world or hold beliefs. The appearance of understanding is compelling but arises from the same mechanism as autocomplete, merely at much greater scale.", "q": "How does the author of Text 2 respond to the argument in Text 1?", "choices": ["By agreeing that LLMs represent a qualitative shift but disputing their safety implications", "By accepting that LLMs generate novel outputs but recharacterising the mechanism as statistical interpolation rather than genuine reasoning", "By arguing that LLMs cannot produce coherent extended text", "By claiming Text 1's author misunderstands what \"understanding\" means philosophically"], "ans": 1}, {"id": "ex7-t2-ctc-e2", "type": "CT", "d": 1, "passage": "Text 1: Urban green spaces — parks, street trees, community gardens — measurably improve the mental health of city residents. Studies consistently find lower stress hormones and higher wellbeing scores among people with access to nearby greenery.  Text 2: The mental health benefits of urban green spaces are real but unevenly distributed. The greenest neighbourhoods in most cities are also the wealthiest. Low-income residents, who may have the greatest need for stress relief, are systematically less likely to have access to quality parks or tree cover.", "q": "Which statement best describes the relationship between the two texts?", "choices": ["Text 2 disputes the finding that green spaces improve mental health", "Text 2 accepts Text 1's finding but raises an equity concern about its distribution", "Text 2 argues that income, not greenery, determines mental health outcomes", "Text 2 focuses on a different country than Text 1"], "ans": 1}, {"id": "ex7-t2-ctc-m2", "type": "CT", "d": 3, "passage": "Text 1: The shift to remote work has been unambiguously positive for worker productivity. Freed from commutes and open-plan offices, employees report higher focus and produce measurably more output per hour.  Text 2: Productivity gains from remote work are concentrated among experienced, senior employees who have established workflows and professional networks. For early-career workers, the absence of in-person mentorship, informal learning, and social integration has measurably slowed career development and reduced long-term output growth.", "q": "How does Text 2 relate to the claim in Text 1?", "choices": ["It confirms Text 1 by providing additional data on productivity", "It argues that remote work is harmful to all employees", "It qualifies Text 1 by showing the productivity benefit is not uniform across all workers", "It introduces new research that contradicts Text 1's methodology"], "ans": 2}, {"id": "ex7-t2-ctc-h2", "type": "CT", "d": 5, "passage": "Text 1: Classical conditioning — the process by which a neutral stimulus becomes associated with a response through repeated pairing — is the foundational mechanism of learned behaviour. Pavlov's experiments demonstrated that associations form automatically and predictably, regardless of the organism's conscious awareness.  Text 2: Cognitive psychologists have since shown that classical conditioning in humans is heavily modulated by expectancy and attention. Humans who are told that a tone will precede a shock show stronger and faster conditioned responses than those who are not told. The \"automatic\" acquisition Pavlov described appears to require, in humans, a cognitive scaffolding that pure behaviourism did not account for.", "q": "How does the author of Text 2 respond to the argument in Text 1?", "choices": ["By denying that classical conditioning exists in humans", "By arguing that Pavlov's experiments were methodologically flawed", "By showing that human conditioning is shaped by cognitive factors that Text 1's mechanism does not capture", "By arguing that expectancy and attention are themselves conditioned responses"], "ans": 2}, {"id": "ex7-t2-cid-e1", "type": "CI", "d": 1, "passage": "The mantis shrimp possesses the most complex visual system of any known animal. While humans have three types of colour-detecting cone cells, the mantis shrimp has sixteen. Paradoxically, research shows that mantis shrimps perform worse than humans on colour discrimination tasks. Scientists hypothesise that the shrimp uses its visual system not to distinguish subtle colour differences but to rapidly classify colours using a simpler matching system, which is faster and more useful in its reef environment.", "q": "What is the main idea of the text?", "choices": ["Mantis shrimps have more cone cells than any other animal", "Having more colour receptors does not necessarily lead to better colour discrimination, as the mantis shrimp's visual system appears optimised for speed rather than subtlety", "Human colour vision is superior to all other species' colour vision", "Scientists have fully explained how the mantis shrimp uses its visual system"], "ans": 1}, {"id": "ex7-t2-cid-e2", "type": "CI", "d": 1, "passage": "The Maillard reaction is a chemical process that occurs when proteins and sugars in food are heated above approximately 140°C. It produces hundreds of flavour compounds and is responsible for the browning of bread crusts, the seared surface of a steak, and the golden colour of roasted coffee beans. Without the Maillard reaction, cooked food would have a fraction of its flavour complexity.", "q": "Which choice best states the main idea of the text?", "choices": ["The Maillard reaction requires temperatures above 140°C to occur", "The Maillard reaction is the chemical process responsible for much of the colour and flavour complexity in cooked food", "Bread, steak, and coffee are the only foods affected by the Maillard reaction", "The Maillard reaction produces exactly the same compounds in every type of food"], "ans": 1}, {"id": "ex7-t2-cid-m1", "type": "CI", "d": 3, "passage": "Contemporary debates about the origins of the First World War have shifted significantly since Fritz Fischer's controversial 1961 thesis that Germany bore primary responsibility. Subsequent historians have distributed blame more broadly, pointing to Austria-Hungary's ultimatum to Serbia, Russia's early mobilisation, and the alliance system that transformed a regional crisis into a continental war. More recently, Christopher Clark's \"sleepwalkers\" thesis argues that all the major powers stumbled into war through miscalculation rather than design, with no single nation primarily culpable.", "q": "Which choice best states the main idea of the text?", "choices": ["Fritz Fischer's thesis about German war guilt remains the dominant view in historical scholarship", "Historiographical understanding of WWI's origins has evolved from attributing primary blame to Germany toward more distributed and contingent accounts", "Christopher Clark's sleepwalkers thesis is the most accurate account of WWI's origins", "The alliance system was the single most important cause of the First World War"], "ans": 1}, {"id": "ex7-t2-cid-m2", "type": "CI", "d": 3, "passage": "The placebo effect has long been understood as a nuisance variable in clinical trials — a confound to be controlled away. More recent research, however, suggests it is a clinically meaningful phenomenon in its own right. Studies show that placebos trigger genuine neurobiological responses, including the release of endorphins in pain conditions. \"Open-label\" placebos — where patients are told they are receiving an inert pill — have shown measurable effects in conditions including irritable bowel syndrome and ADHD.", "q": "Which statement best captures the main idea of the text?", "choices": ["The placebo effect invalidates most clinical trial results", "Researchers now understand placebos as a variable to be eliminated from all trials", "The placebo effect is increasingly recognised as a genuine neurobiological phenomenon with clinical potential, not merely a confound", "Open-label placebos are more effective than conventional medications for most conditions"], "ans": 2}, {"id": "ex7-t2-cid-h1", "type": "CI", "d": 5, "passage": "The development of the germ theory of disease in the late 19th century is often narrated as a straightforward triumph of science over superstition. A more accurate account acknowledges that germ theory initially competed with miasma theory on roughly equal evidential grounds, and that its eventual acceptance owed as much to the social authority of its proponents — particularly Pasteur and Koch — and to its compatibility with emerging state interests in managing urban populations as to its superior predictive power.", "q": "The text is primarily concerned with", "choices": ["proving that miasma theory was more accurate than germ theory", "arguing that germ theory was accepted for non-scientific reasons alone", "complicating the straightforward triumph narrative by acknowledging social and political factors in germ theory's acceptance", "summarising the key experiments that established germ theory"], "ans": 2}, {"id": "ex7-t2-cid-m3", "type": "CI", "d": 3, "passage": "According to a 2022 global survey of ocean plastic pollution, the highest concentrations of surface plastic were found not in mid-ocean gyres, as commonly depicted, but within 50 kilometres of river mouths in Southeast Asia. The ten most polluting rivers, eight of which drain into the South China Sea or Bay of Bengal, contribute an estimated 40% of ocean-bound plastic waste globally. The survey found that addressing riverine sources in five countries could reduce global ocean plastic input by over 25%.", "q": "Based on the passage, what does the survey identify as the most impactful strategy for reducing ocean plastic pollution?", "choices": ["Cleaning up existing plastic in mid-ocean gyres", "Targeting riverine plastic sources in a small number of key countries", "Banning plastic production in Southeast Asia", "Deploying ocean cleanup vessels near the South China Sea"], "ans": 1}, {"id": "ex7-t2-cid-e3", "type": "CI", "d": 1, "passage": "Slime moulds are single-celled organisms that, under certain conditions, aggregate into multicellular structures capable of solving spatial problems. In laboratory experiments, slime moulds have independently recreated patterns remarkably similar to the Tokyo rail network and the road systems of several other cities, connecting nutrient sources in ways that minimise distance and redundancy. This has led researchers to explore slime mould behaviour as a model for network optimisation algorithms.", "q": "What is the main idea of the text?", "choices": ["Slime moulds are more intelligent than previously believed", "Slime moulds exhibit network-optimising behaviour that has inspired computational research", "Tokyo's rail network was designed using slime mould research", "All single-celled organisms can aggregate into multicellular structures"], "ans": 1}, {"id": "ex7-t2-cid-h2", "type": "CI", "d": 5, "passage": "Sociologist Erving Goffman argued that everyday social life is best understood as dramatic performance. Individuals manage their \"front stage\" presentations — what they allow others to see — while retreating to \"back stage\" spaces to relax the performance, prepare for it, or behave in ways that would undermine it if witnessed. Goffman was careful to note that this theatrical metaphor does not imply insincerity: performances can be deeply felt and still be performances.", "q": "The text is primarily concerned with", "choices": ["arguing that people are fundamentally dishonest in social situations", "explaining Goffman's dramaturgical framework for understanding social behaviour, including its key qualification", "comparing Goffman's theory to other sociological frameworks", "analysing how digital communication has changed social performance"], "ans": 1}, {"id": "ex7-t2-coet-e1", "type": "CI", "d": 1, "passage": "Biologist Rachel Carson argued in Silent Spring that the widespread use of synthetic pesticides was causing a catastrophic decline in songbird populations across North America. The title referred to a future spring season without birdsong. Carson was careful to acknowledge that the chemicals were not inherently evil: the problem was their indiscriminate application, the assumption that they could be broadcast over entire landscapes without cascading consequences for non-target species.", "q": "A student claims that Carson's argument was not simply anti-pesticide but against reckless application. Which quotation best supports this claim?", "choices": ["\"widespread use of synthetic pesticides was causing a catastrophic decline in songbird populations\"", "\"the chemicals were not inherently evil: the problem was their indiscriminate application\"", "\"the title referred to a future spring season without birdsong\"", "\"cascading consequences for non-target species\""], "ans": 1}, {"id": "ex7-t2-coet-e2", "type": "CI", "d": 1, "passage": "Cognitive scientist Steven Pinker argues that language is an instinct — a biological adaptation, not a cultural invention. Children acquire language universally and rapidly, with no instruction, in all human societies. Language acquisition follows predictable developmental stages regardless of cultural differences in how parents speak to children. Deaf children exposed to no spoken or signed language have been documented to spontaneously invent gesture systems with structural properties of natural language.", "q": "A student argues that Pinker's strongest evidence for language as a biological instinct comes from children who were never taught any language. Which quotation best supports this claim?", "choices": ["\"Children acquire language universally and rapidly, with no instruction\"", "\"Language acquisition follows predictable developmental stages regardless of cultural differences\"", "\"Deaf children exposed to no spoken or signed language have been documented to spontaneously invent gesture systems with structural properties of natural language\"", "\"language is an instinct — a biological adaptation, not a cultural invention\""], "ans": 2}, {"id": "ex7-t2-coet-m1", "type": "CI", "d": 3, "passage": "Anthropologist David Graeber argued that the standard account of money's origins — barter first, then coins — is a myth with no supporting evidence in the historical or anthropological record. No society practicing systematic barter as a precursor to money has ever been documented. What archaeological and textual evidence does show is that credit and debt preceded coined money by thousands of years, with early Mesopotamian clay tablets recording debts rather than facilitating exchanges between strangers.", "q": "A student claims that Graeber's argument rests not on disproving a theory but on showing it has no empirical basis. Which quotation most directly supports this claim?", "choices": ["\"the standard account of money's origins — barter first, then coins — is a myth\"", "\"No society practicing systematic barter as a precursor to money has ever been documented\"", "\"credit and debt preceded coined money by thousands of years\"", "\"early Mesopotamian clay tablets recording debts rather than facilitating exchanges between strangers\""], "ans": 1}, {"id": "ex7-t2-coet-m2", "type": "CI", "d": 3, "passage": "Psychologist Carol Dweck distinguishes between a fixed mindset — the belief that intelligence and ability are innate and unchangeable — and a growth mindset — the belief that abilities can be developed through effort and practice. Her research found that students praised for intelligence (\"You must be smart\") were more likely to avoid challenging tasks to protect their reputation, while students praised for effort (\"You worked really hard\") were more willing to take on difficult problems and persisted longer when they encountered setbacks.", "q": "A teacher argues that the way adults praise children's success matters more than whether they are praised at all. Which quotation best supports this claim?", "choices": ["\"intelligence and ability are innate and unchangeable\"", "\"abilities can be developed through effort and practice\"", "\"students praised for intelligence were more likely to avoid challenging tasks, while students praised for effort were more willing to take on difficult problems\"", "\"persisted longer when they encountered setbacks\""], "ans": 2}, {"id": "ex7-t2-coet-h1", "type": "CI", "d": 5, "passage": "Legal scholar Roberto Unger argued that the social structures that appear natural and inevitable in any given society are actually the product of specific historical choices that could have been made differently. The law, in particular, is not a neutral arbiter of pre-existing rules but an active force that crystallises particular social settlements and makes them appear permanent. Unger held that recognising this contingency is itself a form of political power: once people understand that institutions are made rather than given, they can imagine and work toward alternatives.", "q": "A political theorist argues that Unger views legal critique as politically empowering. Which quotation most precisely supports this interpretation?", "choices": ["\"social structures that appear natural and inevitable are actually the product of specific historical choices\"", "\"The law is not a neutral arbiter of pre-existing rules but an active force\"", "\"recognising this contingency is itself a form of political power: once people understand that institutions are made rather than given, they can imagine and work toward alternatives\"", "\"that could have been made differently\""], "ans": 2}, {"id": "ex7-t2-coet-e3", "type": "CI", "d": 1, "passage": "Astronomer Vera Rubin's observations of galaxy rotation in the 1970s provided compelling evidence for the existence of dark matter. According to Newtonian mechanics, stars at the outer edges of galaxies should orbit more slowly than those near the centre. Rubin found the opposite: stars at the periphery orbited at roughly the same speed as those near the centre — a result explicable only if galaxies contained far more mass than was visible. Despite this, her work was largely ignored for a decade before the astrophysics community accepted dark matter as a significant research problem.", "q": "A student argues that Rubin's findings were significant not because they confirmed an existing theory but because they revealed a discrepancy that demanded a new explanation. Which quotation best supports this claim?", "choices": ["\"Rubin's observations provided compelling evidence for the existence of dark matter\"", "\"stars at the outer edges of galaxies should orbit more slowly than those near the centre\"", "\"stars at the periphery orbited at roughly the same speed as those near the centre — a result explicable only if galaxies contained far more mass than was visible\"", "\"her work was largely ignored for a decade\""], "ans": 2}, {"id": "ex7-t2-coet-m3", "type": "CI", "d": 3, "passage": "Educational psychologist Benjamin Bloom identified a method of one-on-one human tutoring as producing learning outcomes two standard deviations better than conventional classroom instruction — a result now known as Bloom's 2 Sigma Problem. The challenge he posed was whether any scalable instructional method could approach this level of effectiveness. Bloom's own suggestion was mastery learning — a method where students progress to new material only after demonstrating full competence in current material — which he found to produce outcomes approximately one standard deviation above classroom averages.", "q": "A researcher argues that Bloom identified both a benchmark for ideal instruction and a scalable method that partially achieves it. Which quotation most directly supports this claim?", "choices": ["\"one-on-one human tutoring producing learning outcomes two standard deviations better than conventional classroom instruction\"", "\"whether any scalable instructional method could approach this level of effectiveness\"", "\"Bloom's own suggestion was mastery learning... which he found to produce outcomes approximately one standard deviation above classroom averages\"", "\"students progress to new material only after demonstrating full competence in current material\""], "ans": 2}, {"id": "ex7-t2-coet-h2", "type": "CI", "d": 5, "passage": "Philosopher Simone de Beauvoir argued in The Second Sex that womanhood is not a natural or biological given but a social construction: \"One is not born, but rather becomes, a woman.\" The socialisation process through which girls are trained into femininity — encouraged toward passivity, domestic roles, and relational identity — is so pervasive as to appear natural, which is precisely how it sustains itself. De Beauvoir saw this mystification as the core mechanism of women's oppression: what is constructed is experienced as fate.", "q": "A scholar argues that de Beauvoir's central critique is not just that women are socialised differently from men, but that this socialisation is disguised as something inevitable. Which quotation most precisely supports this interpretation?", "choices": ["\"One is not born, but rather becomes, a woman\"", "\"The socialisation process through which girls are trained into femininity is so pervasive as to appear natural\"", "\"De Beauvoir saw this mystification as the core mechanism of women's oppression: what is constructed is experienced as fate\"", "\"encouraged toward passivity, domestic roles, and relational identity\""], "ans": 2}, {"id": "ex7-t2-coeq-e1", "type": "CI", "d": 1, "passage": "A university tracked graduation rates (%) for first-generation and continuing-generation students over four years: • 2019: First-gen = 54%, Continuing = 72% • 2020: First-gen = 57%, Continuing = 73% • 2021: First-gen = 61%, Continuing = 74% • 2022: First-gen = 65%, Continuing = 75%  The dean concluded that the gap between first-generation and continuing-generation graduation rates is narrowing.", "q": "Which choice most effectively uses data from the table to support the dean's conclusion?", "choices": ["First-generation graduation rates increased every year from 2019 to 2022", "The gap between first-generation and continuing-generation rates fell from 18 percentage points in 2019 to 10 percentage points in 2022", "Continuing-generation rates remained relatively stable, rising only 3 points over the period", "First-generation graduation rates reached 65% by 2022"], "ans": 1}, {"id": "ex7-t2-coeq-m1", "type": "CI", "d": 3, "passage": "Average daily screen time (hours) by age group, 2018 vs 2023: • Age 8–12: 2018 = 4.4 hrs, 2023 = 5.5 hrs • Age 13–17: 2018 = 7.2 hrs, 2023 = 8.9 hrs • Age 18–24: 2018 = 6.8 hrs, 2023 = 7.1 hrs • Age 25–34: 2018 = 4.9 hrs, 2023 = 5.0 hrs  A researcher claims that adolescents experienced the largest absolute increase in daily screen time between 2018 and 2023.", "q": "Which choice most effectively uses data from the table to support this claim?", "choices": ["Adolescents (13–17) had the highest screen time in both 2018 and 2023", "The 13–17 age group increased by 1.7 hours — more than the 1.1-hour increase for 8–12, the 0.3-hour increase for 18–24, and the 0.1-hour increase for 25–34", "Screen time increased for all age groups between 2018 and 2023", "Adults aged 25–34 showed the smallest increase in screen time"], "ans": 1}, {"id": "ex7-t2-coeq-h1", "type": "CI", "d": 5, "passage": "Trial results for three teaching interventions on student test score improvement (points, out of 100): • Group A (traditional lecture): pre = 58, post = 63, gain = +5 • Group B (flipped classroom): pre = 57, post = 67, gain = +10 • Group C (peer tutoring): pre = 59, post = 72, gain = +13 • Control (no intervention): pre = 58, post = 59, gain = +1  The researchers concluded that all three interventions outperformed the control, but peer tutoring produced the most meaningful gains.", "q": "Which choice most effectively uses data from the table to support the researchers' full conclusion?", "choices": ["Peer tutoring students improved by 13 points, compared to only 1 point in the control group", "All three interventions produced gains of at least 5 points, each exceeding the control's 1-point gain, with peer tutoring's 13-point improvement substantially larger than the lecture group's 5 points and the flipped classroom's 10 points", "Group C had the highest post-test score of 72 among all groups", "Group A improved by 5 points while Group C improved by 13 points"], "ans": 1}, {"id": "ex7-t2-coeq-e2", "type": "CI", "d": 1, "passage": "Customer satisfaction ratings (1–10 scale) for a hotel chain before and after a renovation: • Room quality: before = 6.2, after = 8.1 • Service quality: before = 7.8, after = 7.9 • Restaurant: before = 5.4, after = 7.2 • Overall: before = 6.1, after = 7.8  The hotel manager argues that the renovation had the greatest impact on areas where satisfaction was previously lowest.", "q": "Which choice most effectively uses data from the table to support the manager's argument?", "choices": ["Overall satisfaction improved from 6.1 to 7.8 after the renovation", "The restaurant, which had the lowest pre-renovation score (5.4), gained 1.8 points, while service quality, which was already highest at 7.8, gained only 0.1 points", "All four categories showed improvement after the renovation", "Room quality improved by 1.9 points, the largest absolute gain of any category"], "ans": 1}, {"id": "ex7-t2-coeq-m2", "type": "CI", "d": 3, "passage": "Population of four major cities (millions), 2000 vs 2020: • Lagos: 2000 = 7.2M, 2020 = 15.3M (+112%) • Shanghai: 2000 = 13.2M, 2020 = 26.3M (+99%) • São Paulo: 2000 = 10.4M, 2020 = 12.3M (+18%) • Moscow: 2000 = 10.1M, 2020 = 12.5M (+24%)  A demographer argues that African and Asian cities have experienced dramatically faster population growth than South American and European cities in the 21st century.", "q": "Which choice most effectively uses the data to support this claim?", "choices": ["Lagos grew from 7.2 million to 15.3 million between 2000 and 2020", "Lagos and Shanghai grew by 112% and 99% respectively, while São Paulo and Moscow grew by only 18% and 24%, showing dramatically higher growth rates in the African and Asian cities", "Shanghai had the largest absolute population in both 2000 and 2020", "All four cities grew between 2000 and 2020"], "ans": 1}, {"id": "ex7-t2-coeq-h2", "type": "CI", "d": 5, "passage": "Energy consumption per unit of GDP (megajoules per dollar, 2005 prices) for four countries, 1990 vs 2020: • China: 1990 = 28.4, 2020 = 8.1 (−71%) • India: 1990 = 18.2, 2020 = 10.3 (−43%) • USA: 1990 = 9.1, 2020 = 4.8 (−47%) • Germany: 1990 = 5.8, 2020 = 2.9 (−50%)  An economist argues that China demonstrated the most dramatic improvement in energy efficiency relative to its starting point, even though it remains the least efficient of the four economies.", "q": "Which choice most effectively uses data to support the economist's complete argument?", "choices": ["China's energy intensity fell from 28.4 to 8.1 megajoules per dollar, a 71% reduction — the largest proportional decline of any country shown, though China's 2020 figure of 8.1 remains higher than the 2020 figures for India (10.3), USA (4.8), and Germany (2.9)", "China reduced its energy intensity by 20.3 megajoules per dollar, the largest absolute decline of any country", "Germany achieved the lowest energy intensity by 2020 at 2.9 megajoules per dollar", "All four countries reduced their energy intensity between 1990 and 2020"], "ans": 0}, {"id": "ex7-t2-inf-e1", "type": "INF", "d": 1, "passage": "The hospital's cafeteria, which had historically operated until 10 PM, changed its hours to close at 6 PM. Within two weeks, nursing staff on the night shift had organised a petition with 340 signatures, and several nurses from the overnight rotation had begun bringing large coolers of food from home.", "q": "Which inference is most directly supported by the passage?", "choices": ["The hospital was trying to save money by reducing cafeteria hours", "Night-shift nursing staff relied on the cafeteria for meals during their shifts", "The petition successfully convinced management to restore the original hours", "Bringing food from home is against hospital policy"], "ans": 1}, {"id": "ex7-t2-inf-e2", "type": "INF", "d": 1, "passage": "Professor Chen submitted her book manuscript to seven academic publishers. Six replied within two months; the seventh did not respond for eleven months, finally sending a two-sentence rejection. Professor Chen had already signed a contract with a different publisher four months earlier.", "q": "What can most reasonably be inferred from the passage?", "choices": ["The seventh publisher intentionally delayed to sabotage Professor Chen's career", "The seventh publisher's rejection arrived too late to affect the outcome, as Professor Chen had already found a publisher", "Professor Chen's book was rejected by all seven publishers", "Academic publishers typically respond within two months"], "ans": 1}, {"id": "ex7-t2-inf-m1", "type": "INF", "d": 3, "passage": "In 2003, the government of Argentina issued bonds denominated in US dollars to international creditors. When Argentina defaulted in 2005 and restructured its debt at 30 cents on the dollar, most creditors accepted the deal. A small group of hedge funds, purchasing the bonds at their depressed post-default price, refused to accept the restructuring terms and sued Argentina in US courts for full repayment. In 2014, a US federal judge ruled in their favour, blocking Argentina from making payments to cooperating creditors until the holdouts were paid in full.", "q": "Based on the passage, which can most reasonably be inferred about the hedge funds' strategy?", "choices": ["The hedge funds were motivated primarily by a desire to help Argentina's economy recover", "The hedge funds' strategy depended on purchasing distressed debt cheaply and then using legal leverage to recover the original face value", "All international creditors refused to accept Argentina's restructuring terms", "The US court ruling required Argentina to immediately pay all creditors in full"], "ans": 1}, {"id": "ex7-t2-inf-m2", "type": "INF", "d": 3, "passage": "When the Académie française was founded in 1634 to regulate and preserve the French language, one of its mandates was to compile a definitive dictionary. The first edition was published in 1694 — sixty years later. The ninth edition, begun in 1986, was still incomplete as of 2023, with publication of the final fascicle expected by 2035.", "q": "Based on the passage, which of the following can most reasonably be inferred?", "choices": ["The Académie française has failed in its mission to preserve the French language", "Compiling a comprehensive dictionary of a living language is an inherently slow and complex undertaking", "The French language changes too rapidly for any dictionary to capture accurately", "The ninth edition is superior to the first edition because it took longer to complete"], "ans": 1}, {"id": "ex7-t2-inf-m3", "type": "INF", "d": 3, "passage": "The carbon dating of a linen fragment found near the Dead Sea in 1947 indicated the material was approximately 2,000 years old. The fragment came from a jar that also contained a well-preserved scroll written in Hebrew. The scroll's text described rituals and regulations consistent with known accounts of a sect that existed in the Judaean desert during the 1st century BCE and 1st century CE.", "q": "Based on the passage, which inference is best supported?", "choices": ["The scroll definitively proves the existence of a previously unknown religion", "The physical evidence and textual content together suggest the scroll was likely produced by or for the sect mentioned in known historical accounts", "Carbon dating can precisely determine the authorship of ancient manuscripts", "All scrolls found near the Dead Sea date from the 1st century"], "ans": 1}, {"id": "ex7-t2-inf-h1", "type": "INF", "d": 5, "passage": "During the 1990s, several Central and Eastern European countries that had recently transitioned from communist to market economies initially saw their GDP fall sharply before eventually growing. Economists noted that the initial declines were steepest in countries that adopted rapid market liberalisation, while countries that maintained more state involvement in the economy during the transition showed smaller initial contractions, though their recoveries were also generally slower.", "q": "Based on the passage, which inference about economic transition policy is best supported?", "choices": ["Rapid market liberalisation always leads to permanent economic decline", "State involvement in the economy always produces better long-term outcomes than market liberalisation", "The pace and approach of market liberalisation involved tradeoffs between the severity of short-term contraction and the speed of subsequent recovery", "Communist economies were more stable than market economies in Eastern Europe"], "ans": 2}, {"id": "ex7-t2-inf-h2", "type": "INF", "d": 5, "passage": "The Roman historian Tacitus wrote his account of the reign of Emperor Tiberius roughly eighty years after the events he described. He relied on senatorial records, earlier historians whose works have since been lost, and oral traditions. Modern historians note that Tacitus had a marked literary preference for dramatic characterisation and that the senate, his primary source community, had strong institutional reasons to portray Tiberius negatively.", "q": "Based on the passage, which inference about Tacitus's account is best supported?", "choices": ["Tacitus deliberately fabricated his account of Tiberius's reign", "Tacitus's account is entirely unreliable and should be disregarded by historians", "Tacitus's account should be used with awareness that his sources, methods, and literary preferences may have shaped the portrayal of Tiberius in ways that are difficult to disentangle", "The senatorial records Tacitus used were deliberately falsified to discredit Tiberius"], "ans": 2}, {"id": "ex7-t2-inf-e3", "type": "INF", "d": 1, "passage": "In the weeks following the announcement of a major new employer moving to a mid-sized city, apartment rental listings in the area dropped by 40% and average asking rents increased by 18% compared to the same period the previous year.", "q": "Which inference is most directly supported by the passage?", "choices": ["The new employer caused housing prices to fall", "Landlords anticipated increased demand for housing and adjusted accordingly", "The city government increased rental regulations following the announcement", "The new employer would bring lower-income workers to the city"], "ans": 1}, {"id": "ex7-t2-secb-e1", "type": "SEC", "d": 1, "passage": "The expedition encountered unexpected difficulties ______ a sudden snowstorm blocked the mountain pass and forced the team to turn back.", "q": "Which choice completes the text so that it conforms to Standard English?", "choices": [":", ";", ",", " when"], "ans": 3}, {"id": "ex7-t2-secb-e2", "type": "SEC", "d": 1, "passage": "The committee reviewed three proposals ______ ultimately selected the one with the lowest projected cost.", "q": "Which choice completes the text so that it conforms to Standard English?", "choices": ["and", "; and", ",", "; however,"], "ans": 0}, {"id": "ex7-t2-secb-m1", "type": "SEC", "d": 3, "passage": "The new policy applies to all full-time employees ______ part-time workers hired after January 1st are also covered under its provisions.", "q": "Which choice completes the text so that it conforms to Standard English?", "choices": ["; furthermore,", "; however,", ",", " but"], "ans": 0}, {"id": "ex7-t2-secb-m2", "type": "SEC", "d": 3, "passage": "Dr Osei has published over forty papers on climate modelling ______ her work on ocean temperature variability is considered foundational in the field.", "q": "Which choice completes the text so that it conforms to Standard English?", "choices": [",", "; her", ". Her", "; and her"], "ans": 1}, {"id": "ex7-t2-secb-h1", "type": "SEC", "d": 5, "passage": "The proposal was initially met with enthusiasm by the board ______ concerns about implementation costs — specifically the need to retrain existing staff — led three members to withdraw their support.", "q": "Which choice completes the text so that it conforms to Standard English?", "choices": ["; however,", ", however,", "; but", "; and then"], "ans": 0}, {"id": "ex7-t2-secf-e1", "type": "SEC", "d": 1, "passage": "Neither the manager nor the employees ______ informed about the policy change until the day it took effect.", "q": "Which choice completes the text so that it conforms to Standard English?", "choices": ["was", "were", "has been", "is"], "ans": 1}, {"id": "ex7-t2-secf-e2", "type": "SEC", "d": 1, "passage": "The research team submitted ______ findings to three peer-reviewed journals simultaneously.", "q": "Which choice completes the text so that it conforms to Standard English?", "choices": ["their", "its", "it's", "there"], "ans": 0}, {"id": "ex7-t2-secf-m1", "type": "SEC", "d": 3, "passage": "Trained as a marine biologist, the reef's ecosystem was the subject of the researcher's fifteen-year study.", "q": "Which choice best corrects the modifier error in this sentence?", "choices": ["Trained as a marine biologist, the researcher spent fifteen years studying the reef's ecosystem.", "Being trained as a marine biologist, the reef's ecosystem was studied for fifteen years.", "The reef's ecosystem, trained as a marine biologist, was studied for fifteen years.", "A marine biologist training, the reef's ecosystem was the subject of the study."], "ans": 0}, {"id": "ex7-t2-secf-m2", "type": "SEC", "d": 3, "passage": "By the time investigators arrived at the scene, the witnesses ______ already departed.", "q": "Which choice completes the text so that it conforms to Standard English?", "choices": ["have", "had", "were", "would have"], "ans": 1}, {"id": "ex7-t2-secf-h1", "type": "SEC", "d": 5, "passage": "The panel of experts ______ that the proposed regulations, if enacted, would likely reduce emissions by 12–15% over the next decade.", "q": "Which choice completes the text so that it conforms to Standard English?", "choices": ["concluded", "have concluded", "concludes", "are concluding"], "ans": 0}, {"id": "ex7-t2-trans-e1", "type": "TRN", "d": 1, "passage": "The new medication significantly reduced symptoms in clinical trials. ______, patients reported mild side effects, including nausea and fatigue, particularly in the first two weeks of treatment.", "q": "Which choice completes the text with the most logical transition?", "choices": ["Therefore", "Similarly", "However", "As a result"], "ans": 2}, {"id": "ex7-t2-trans-e2", "type": "TRN", "d": 1, "passage": "The survey found that 78% of employees felt undervalued by their managers. ______, turnover in the division had reached a five-year high.", "q": "Which choice completes the text with the most logical transition?", "choices": ["In contrast", "Unsurprisingly", "Nevertheless", "Alternatively"], "ans": 1}, {"id": "ex7-t2-trans-m1", "type": "TRN", "d": 3, "passage": "The original bridge design called for a single span of 400 metres. ______, geological surveys revealed that the riverbed could not support the proposed foundation, requiring engineers to redesign the crossing with two shorter spans.", "q": "Which choice completes the text with the most logical transition?", "choices": ["Furthermore", "In addition", "However", "Consequently"], "ans": 2}, {"id": "ex7-t2-trans-m2", "type": "TRN", "d": 3, "passage": "Photosynthesis requires light, water, and carbon dioxide. ______, the process also depends on specific temperature ranges, as enzyme activity within the chloroplast slows significantly below 10°C.", "q": "Which choice completes the text with the most logical transition?", "choices": ["However", "In addition", "Therefore", "By contrast"], "ans": 1}, {"id": "ex7-t2-trans-h1", "type": "TRN", "d": 5, "passage": "The study's authors controlled for age, income, and pre-existing health conditions, finding a statistically significant correlation between sleep duration and cardiovascular risk. ______, the study's observational design prevents any causal inference: it cannot be determined whether poor sleep causes cardiovascular risk, or whether underlying health conditions cause both poor sleep and elevated cardiovascular risk.", "q": "Which choice completes the text with the most logical transition?", "choices": ["Moreover", "Consequently", "That said", "Instead"], "ans": 2}, {"id": "ex7-t2-rs-e1", "type": "RS", "d": 1, "passage": "A student is writing about the benefits of learning a second language. Notes: • Bilingual people have a lower risk of developing dementia • Learning a second language improves attention and task-switching • Second language learners gain access to literature, media, and cultures in the original language • Companies increasingly seek bilingual employees and pay higher salaries for this skill", "q": "Which choice most effectively uses the notes to make a claim about the practical career benefits of bilingualism?", "choices": ["Learning a second language improves cognitive function and reduces dementia risk.", "Bilingual individuals earn higher salaries on average and are increasingly sought after by employers, making bilingualism a valuable professional asset.", "Speaking two languages gives people access to more cultural content.", "Learning a second language has benefits for the brain, culture, and career."], "ans": 1}, {"id": "ex7-t2-rs-m1", "type": "RS", "d": 3, "passage": "A student is writing a report on the impact of microplastics on marine ecosystems. Notes: • Microplastics (particles < 5mm) have been found in all oceans, including the deep sea • Fish that ingest microplastics show reduced feeding, growth, and reproductive rates • Microplastics can absorb and concentrate toxic chemicals from surrounding water • A 2023 study found microplastics in the blood of 77% of tested fish species • Some microplastics originate from the breakdown of larger plastic waste; others are manufactured at small size for cosmetics and industrial use", "q": "Which choice most effectively synthesises the notes to support a claim about the threat microplastics pose to marine life?", "choices": ["Microplastics are found everywhere in the ocean, from the surface to the deep sea.", "Present in 77% of tested fish species and linked to reduced feeding, growth, and reproduction — as well as to the concentration of toxic chemicals — microplastics represent a multi-pathway threat to marine organisms.", "Microplastics come from two main sources: the breakdown of larger plastics and small manufactured particles.", "Microplastics are a growing concern for scientists who study ocean health."], "ans": 1}, {"id": "ex7-t2-rs-h1", "type": "RS", "d": 5, "passage": "A student is writing a policy analysis arguing that public transit investment reduces urban traffic congestion. Notes: • Cities that invested heavily in public transit between 2000–2020 saw average commute times fall by 11 minutes • For every 1% increase in transit ridership, road vehicle traffic falls by approximately 0.4% • Infrastructure costs for new rail lines average $150M per kilometre • Cities with high transit investment show lower per-capita carbon emissions from transportation • Critics argue that suburban residents, who may not live near transit lines, receive little benefit from urban transit investment • A 2021 pilot in Denver: a single new light rail line reduced vehicle trips on one corridor by 18%", "q": "The student wants to write a sentence using quantitative evidence to support the argument while acknowledging the strongest counterargument. Which best accomplishes this?", "choices": ["Public transit investment is expensive but environmentally beneficial.", "The Denver pilot demonstrated that a single light rail line can reduce vehicle trips on a corridor by 18%, and cities with transit investment show reduced commute times and emissions, though critics rightly note that suburban residents distant from transit lines may see fewer direct benefits.", "For every 1% increase in ridership, road traffic falls 0.4%, which proves public transit reduces congestion.", "Public transit investment reduces traffic, although it costs $150M per kilometre to build new rail."], "ans": 1}, {"id": "ex7-t2-rs-e2", "type": "RS", "d": 1, "passage": "A student is writing about the importance of sleep for academic performance. Notes: • Teenagers need 8–10 hours of sleep per night • Sleep deprivation reduces concentration, memory consolidation, and reaction time • A study found students sleeping fewer than 7 hours scored 9% lower on standardised tests • Most teenagers report getting only 6–7 hours on school nights", "q": "Which choice most effectively uses the notes to support a claim about the academic consequences of insufficient sleep?", "choices": ["Most teenagers are not getting enough sleep on school nights.", "Since most teenagers sleep only 6–7 hours on school nights — below the recommended 8–10 hours — they are at risk of the 9% test score reduction associated with sleeping fewer than 7 hours.", "Sleep deprivation affects concentration, memory, and reaction time.", "Teenagers should sleep more to do better in school."], "ans": 1}, {"id": "ex7-t2-rs-m2", "type": "RS", "d": 3, "passage": "A student is writing a comparative essay on two economic development strategies. Notes: • Export-led growth (ELG): focuses on manufacturing goods for international markets • Import substitution industrialisation (ISI): develops domestic industry to replace imported goods • ELG associated with rapid growth in South Korea, Taiwan, and Singapore from 1960s–1990s • ISI associated with periods of growth but also debt crises in Latin America (1970s–1980s) • Both strategies require significant initial government investment • ELG depends on access to global markets; ISI can be pursued relatively independently", "q": "The student wants to highlight the key practical difference in how the two strategies relate to the global economy. Which choice best accomplishes this?", "choices": ["Both ELG and ISI require government investment, making them similar in their initial costs.", "ELG and ISI have both produced economic growth in different contexts, though ISI has also been associated with debt crises.", "While ELG requires access to global markets and is therefore dependent on international trade conditions, ISI can be pursued more independently of the global economy.", "ELG produced faster growth in East Asia than ISI did in Latin America."], "ans": 2}, {"id": "ex7-t2-rs-h2", "type": "RS", "d": 5, "passage": "Notes for an essay on the ethics of predictive policing algorithms: • Predictive policing uses historical crime data to forecast likely crime locations or individuals • A 2019 audit found prediction algorithms flagged Black defendants as high-risk at twice the rate of white defendants with similar criminal histories • Proponents argue the algorithms are more objective than individual officer judgement, which is also subject to bias • Critics argue that algorithms trained on historically biased arrest data will reproduce and amplify that bias • Several cities including Santa Cruz and New Orleans banned predictive policing between 2020–2022 • Accuracy rates for location-based prediction average 60–65% — better than chance but with a high rate of false positives", "q": "The student wants to write a sentence that presents the central ethical tension in predictive policing rather than taking a definitive position. Which choice best accomplishes this?", "choices": ["Predictive policing algorithms are biased and should be banned.", "Several cities have already banned predictive policing, suggesting the technology is more harmful than useful.", "Predictive policing algorithms present a genuine ethical dilemma: while they may reduce individual officer bias, they risk encoding and amplifying historical biases embedded in the data on which they are trained.", "Predictive policing is 60–65% accurate, which makes it more reliable than human judgement alone."], "ans": 2}, {"id": "ex7-inf-sup1", "type": "INF", "d": 3, "passage": "The school had never offered advanced mathematics beyond calculus. When a new principal arrived, she surveyed students about interest in a statistics course. Eighty percent expressed interest. The course was not added to the curriculum in the following year, and the principal cited 'scheduling constraints' in a parent newsletter.", "q": "The passage most strongly implies that:", "choices": ["scheduling constraints genuinely prevented the course from being added", "the principal's survey results did not translate into action, and the 'scheduling constraints' rationale may have reflected other, unstated obstacles", "most students who expressed interest were not academically prepared for the course", "the principal intended to add the course in a future year"], "ans": 1}, {"id": "ex7-inf-sup2", "type": "INF", "d": 4, "passage": "The technology company had publicly committed to carbon neutrality by 2030. Its most recent sustainability report showed that absolute carbon emissions had increased 34% over the previous three years, while its 'carbon intensity' metric — emissions per unit of revenue — had declined 12%.", "q": "The shift from reporting absolute emissions to reporting carbon intensity most strongly implies that:", "choices": ["the company had found a more scientifically accurate way to measure its environmental impact", "reporting carbon intensity rather than absolute emissions allowed the company to report progress on a metric that improved even as its total environmental footprint grew", "the company had abandoned its 2030 carbon neutrality commitment", "regulatory requirements had changed the reporting standards the company was required to use"], "ans": 1}, {"id": "ex7-trn-sup1", "type": "TRN", "d": 3, "passage": "The intervention had been shown to reduce anxiety in clinical populations in three randomized controlled trials. ______ all three trials used self-reported outcome measures, and participants in the treatment group were aware they were receiving the active intervention — conditions that may have inflated the apparent effect.", "q": "Which choice completes the text with the most logical transition?", "choices": ["As a result,", "Similarly,", "These results are promising; however,", "Therefore,"], "ans": 2}]
+const MATH   = [{"id": "ex7-t2-lin1-e1", "d": 1, "type": "mcq", "calc": false, "skill": "ALG", "q": "7x + 4 = 39. What is x?", "choices": ["x = 4", "x = 5", "x = 6", "x = 7"], "ans": 1}, {"id": "ex7-t2-lin1-e2", "d": 1, "type": "mcq", "calc": false, "skill": "ALG", "q": "2(x + 6) = 3(x − 1). What is x?", "choices": ["x = 12", "x = 15", "x = 9", "x = 3"], "ans": 1}, {"id": "ex7-t2-lin1-m1", "d": 3, "type": "mcq", "calc": true, "skill": "ALG", "q": "If a customer's bill was $43, how many texts did they send?", "choices": ["150", "180", "200", "430"], "ans": 1}, {"id": "ex7-t2-lin1-m2", "d": 3, "type": "mcq", "calc": true, "skill": "ALG", "q": "If (x/3) − (x/6) = 4, what is x?", "choices": ["x = 12", "x = 18", "x = 24", "x = 8"], "ans": 2}, {"id": "ex7-t2-lin1-h1", "d": 5, "type": "mcq", "calc": true, "skill": "ALG", "q": "|5x − 10| = 3x + 2. What are the solution(s)?", "choices": ["x = 6 only", "x = 1 only", "x = 6 and x = 1", "No solution"], "ans": 2}, {"id": "ex7-t2-lin1-h2", "d": 5, "type": "mcq", "calc": true, "skill": "ALG", "q": "If 4(x − 2) = 2(x + 5), what is x?", "choices": ["x = 5", "x = 7", "x = 9", "x = 11"], "ans": 2}, {"id": "ex7-t2-lin2-e1", "d": 1, "type": "mcq", "calc": false, "skill": "ALG", "q": "If 3x − y = 10 and y = 2, what is x?", "choices": ["x = 3", "x = 4", "x = 5", "x = 6"], "ans": 1}, {"id": "ex7-t2-lin2-m1", "d": 3, "type": "mcq", "calc": true, "skill": "ALG", "q": "Solve: x + y = 7 and 2x − y = 2.", "choices": ["(3, 4)", "(4, 3)", "(2, 5)", "(5, 2)"], "ans": 0}, {"id": "ex7-t2-lin2-h1", "d": 5, "type": "mcq", "calc": true, "skill": "ALG", "q": "For what value of k does the system 2x + ky = 8 and 6x + 3y = 24 have infinitely many solutions?", "choices": ["k = 1", "k = 2", "k = 3", "k = 6"], "ans": 0}, {"id": "ex7-t2-linf-e1", "d": 1, "type": "mcq", "calc": false, "skill": "ALG", "q": "A linear function g satisfies g(1) = 3 and g(4) = 12. What is g(7)?", "choices": ["18", "21", "24", "27"], "ans": 1}, {"id": "ex7-t2-linf-m1", "d": 3, "type": "mcq", "calc": true, "skill": "ALG", "q": "Which function gives the height h(t) after t hours?", "choices": ["h(t) = 1.5t + 20", "h(t) = 20 − 1.5t", "h(t) = 20t − 1.5", "h(t) = 1.5(20 − t)"], "ans": 1}, {"id": "ex7-t2-linf-h1", "d": 5, "type": "mcq", "calc": true, "skill": "ALG", "q": "Line m passes through (4, −1) and is perpendicular to y = 2x + 5. What is the y-intercept of m?", "choices": ["7", "−9", "1", "−1"], "ans": 2}, {"id": "ex7-t2-linineq-e1", "d": 1, "type": "mcq", "calc": false, "skill": "ALG", "q": "Which value satisfies 4x − 3 ≥ 13?", "choices": ["x = 2", "x = 3", "x = 4", "x = 5"], "ans": 2}, {"id": "ex7-t2-linineq-m1", "d": 3, "type": "mcq", "calc": true, "skill": "ALG", "q": "What is the minimum number of items n the store must sell?", "choices": ["100", "125", "150", "175"], "ans": 2}, {"id": "ex7-t2-linineq-h1", "d": 5, "type": "mcq", "calc": true, "skill": "ALG", "q": "Which represents all x satisfying both −2x + 7 > 3 and 3x − 1 ≤ 14?", "choices": ["x < 2", "2 < x ≤ 5", "x < 2 or x ≤ 5", "x < 2 and x ≤ 5 (i.e. x < 2)"], "ans": 3}, {"id": "ex7-t2-sys-e1", "d": 1, "type": "mcq", "calc": false, "skill": "ALG", "q": "If 2x + y = 11 and x + y = 7, what is x?", "choices": ["2", "3", "4", "5"], "ans": 2}, {"id": "ex7-t2-sys-m1", "d": 3, "type": "mcq", "calc": true, "skill": "ALG", "q": "What is the larger number?", "choices": ["28", "29", "31", "33"], "ans": 2}, {"id": "ex7-t2-sys-h1", "d": 5, "type": "mcq", "calc": true, "skill": "ALG", "q": "The system 3x + ay = 12 and bx + 4y = 16 has no solution. If a = 2, what must be true about b?", "choices": ["b = 6 and the constants are proportional", "b = 6 and the constants are not proportional", "b = 4", "b can be any value"], "ans": 1}, {"id": "ex7-t2-ilm-e1", "d": 1, "type": "mcq", "calc": false, "skill": "ALG", "q": "What does the value 40 represent?", "choices": ["Cost per mile", "Total cost of the rental", "The flat daily rate regardless of miles driven", "The number of miles driven"], "ans": 2}, {"id": "ex7-t2-ilm-m1", "d": 3, "type": "mcq", "calc": true, "skill": "ALG", "q": "What does the model predict about the company's finances?", "choices": ["The company loses $900 for every unit sold", "The company breaks even after selling 20 units, earning $45,000 profit per unit after that", "The company needs to sell 900 units before breaking even", "Each unit earns $900 in revenue"], "ans": 1}, {"id": "ex7-t2-ilm-h1", "d": 5, "type": "mcq", "calc": true, "skill": "ALG", "q": "Which of the following is the most accurate interpretation of this model?", "choices": ["A tree grows 1.2 metres per year", "At age zero, the tree is 1.2 metres tall, and grows approximately 0.8 metres per year thereafter", "A tree will be exactly 1.2 metres tall at age zero and stop growing at 0.8 metres", "The tree grows 0.8 metres total over its lifetime"], "ans": 1}, {"id": "ex7-t2-quad-e1", "d": 1, "type": "mcq", "calc": false, "skill": "ALG", "q": "What are the solutions to x² + 2x − 15 = 0?", "choices": ["x = 3 and x = −5", "x = −3 and x = 5", "x = 5 and x = 3", "x = −5 and x = −3"], "ans": 0}, {"id": "ex7-t2-quad-m1", "d": 3, "type": "mcq", "calc": true, "skill": "ALG", "q": "The parabola y = −x² + 4x + k passes through the point (1, 8). What is k?", "choices": ["k = 3", "k = 5", "k = 7", "k = 9"], "ans": 1}, {"id": "ex7-t2-quad-h1", "d": 5, "type": "mcq", "calc": true, "skill": "ALG", "q": "How many distinct real solutions does x² + 6x + 9 = 0 have?", "choices": ["0", "1", "2", "3"], "ans": 1}, {"id": "ex7-t2-expo-e1", "d": 1, "type": "mcq", "calc": false, "skill": "ALG", "q": "A population of 200 triples every 4 years. What is the population after 12 years?", "choices": ["1,800", "3,600", "5,400", "16,200"], "ans": 2}, {"id": "ex7-t2-expo-m1", "d": 3, "type": "mcq", "calc": true, "skill": "ALG", "q": "The value of an investment grows by 8% per year. If the initial investment is $5,000, which expression gives its value after t years?", "choices": ["5000(1.08)^t", "5000(0.92)^t", "5000 + 0.08t", "5000(1.8)^t"], "ans": 0}, {"id": "ex7-t2-expo-h1", "d": 5, "type": "mcq", "calc": true, "skill": "ALG", "q": "If 9^(x−1) = 27^(x+1), what is x?", "choices": ["x = −5", "x = −7", "x = 5", "x = 7"], "ans": 0}, {"id": "ex7-t2-func-e1", "d": 1, "type": "mcq", "calc": false, "skill": "ALG", "q": "If h(x) = 4x² − x + 2, what is h(2)?", "choices": ["14", "16", "18", "20"], "ans": 1}, {"id": "ex7-t2-func-m1", "d": 3, "type": "mcq", "calc": true, "skill": "ALG", "q": "The graph of p(x) = f(x + 2) − 3 is obtained from f(x) by which transformation?", "choices": ["Left 2, down 3", "Right 2, up 3", "Left 2, up 3", "Right 2, down 3"], "ans": 0}, {"id": "ex7-t2-func-h1", "d": 5, "type": "mcq", "calc": true, "skill": "ALG", "q": "If f(x) = 3x − 2 and g(x) = x² + 1, what is g(f(2))?", "choices": ["17", "25", "35", "49"], "ans": 0}, {"id": "ex7-t2-equiv-e1", "d": 1, "type": "mcq", "calc": false, "skill": "ALG", "q": "Which is equivalent to (2x + 3)²?", "choices": ["4x² + 9", "4x² + 6x + 9", "4x² + 12x + 9", "2x² + 12x + 9"], "ans": 2}, {"id": "ex7-t2-equiv-m1", "d": 3, "type": "mcq", "calc": true, "skill": "ALG", "q": "Which expression is equivalent to (3x³ − 12x)/(3x)?", "choices": ["x² − 4", "x³ − 4x", "x² − 12", "3x² − 4"], "ans": 0}, {"id": "ex7-t2-equiv-h1", "d": 5, "type": "mcq", "calc": true, "skill": "ALG", "q": "Which is equivalent to (x² − x − 6)/(x² − 4)?", "choices": ["(x − 3)/(x − 2)", "(x + 3)/(x + 2)", "(x − 3)/(x + 2)", "(x + 3)/(x − 2)"], "ans": 0}, {"id": "ex7-t2-poly-e1", "d": 1, "type": "mcq", "calc": false, "skill": "ALG", "q": "What is the remainder when x³ + 3x − 5 is divided by (x − 1)?", "choices": ["−1", "0", "−5", "1"], "ans": 0}, {"id": "ex7-t2-poly-e2", "d": 1, "type": "mcq", "calc": false, "skill": "ALG", "q": "What is the degree of the polynomial 5x⁴ − 3x³ + 2x − 7?", "choices": ["1", "2", "3", "4"], "ans": 3}, {"id": "ex7-t2-poly-m1", "d": 3, "type": "mcq", "calc": true, "skill": "ALG", "q": "If (x − 3) is a factor of x³ − 2x² + ax − 6, what is a?", "choices": ["a = −1", "a = 1", "a = 3", "a = 5"], "ans": 0}, {"id": "ex7-t2-poly-h1", "d": 5, "type": "mcq", "calc": true, "skill": "ALG", "q": "For what values of x is (x² − 9)/(x² − x − 6) undefined?", "choices": ["x = 3 and x = −3", "x = 3 and x = −2", "x = −3 and x = 2", "x = 2 only"], "ans": 1}, {"id": "ex7-t2-rat-m1", "d": 3, "type": "mcq", "calc": true, "skill": "ALG", "q": "Simplify: (x² − 4x + 3)/(x² − 1)", "choices": ["(x − 3)/(x + 1)", "(x − 3)/(x − 1)", "(x + 3)/(x + 1)", "(x − 1)/(x + 1)"], "ans": 0}, {"id": "ex7-t2-rat-e1", "d": 1, "type": "mcq", "calc": false, "skill": "ALG", "q": "Which value of x is excluded from the domain of f(x) = 5/(x − 4)?", "choices": ["x = 0", "x = 4", "x = 5", "x = −4"], "ans": 1}, {"id": "ex7-t2-rad-e1", "d": 1, "type": "mcq", "calc": false, "skill": "ALG", "q": "If √(3x − 5) = 4, what is x?", "choices": ["x = 5", "x = 7", "x = 9", "x = 11"], "ans": 1}, {"id": "ex7-t2-rad-m1", "d": 3, "type": "mcq", "calc": true, "skill": "ALG", "q": "What is the solution set of √(2x + 3) = x?", "choices": ["x = 3 only", "x = −1 only", "x = 3 and x = −1", "No solution"], "ans": 0}, {"id": "ex7-t2-rad-h1", "d": 5, "type": "mcq", "calc": true, "skill": "ALG", "q": "For what values of x is |4x + 8| ≥ 12?", "choices": ["x ≤ −5 or x ≥ 1", "−5 ≤ x ≤ 1", "x ≤ −1 or x ≥ 5", "x ≥ 1 only"], "ans": 0}, {"id": "ex7-t2-nonlin-e1", "d": 1, "type": "mcq", "calc": false, "skill": "ALG", "q": "How many solutions does y = x² − 3 and y = 1 have?", "choices": ["0", "1", "2", "3"], "ans": 2}, {"id": "ex7-t2-nonlin-m1", "d": 3, "type": "mcq", "calc": true, "skill": "ALG", "q": "For y = x² + 2x and y = 4x + 3, what are the x-values of intersection?", "choices": ["x = 1 and x = 3", "x = −1 and x = 3", "x = 3 only", "x = −3 and x = 1"], "ans": 1}, {"id": "ex7-t2-nonlin-h1", "d": 5, "type": "mcq", "calc": true, "skill": "ALG", "q": "For what value of c does y = x + c intersect y = x² exactly once?", "choices": ["c = −1/4", "c = 0", "c = 1/4", "c = 1"], "ans": 0}, {"id": "ex7-t2-psda-e1", "d": 1, "type": "mcq", "calc": false, "skill": "STAT", "q": "A map has a scale of 1 cm : 25 km. Two cities are 7.6 cm apart on the map. What is the actual distance?", "choices": ["170 km", "190 km", "200 km", "215 km"], "ans": 1}, {"id": "ex7-t2-psda-rat2", "d": 3, "type": "mcq", "calc": true, "skill": "STAT", "q": "A factory produces 240 units in 6 hours with 4 machines. How many units would 6 machines produce in 9 hours at the same rate?", "choices": ["480", "540", "540", "540"], "ans": 2}, {"id": "ex7-t2-psda-rat3", "d": 5, "type": "mcq", "calc": true, "skill": "STAT", "q": "If x varies directly as y and inversely as z², and x = 6 when y = 9 and z = 3, what is x when y = 16 and z = 4?", "choices": ["4", "5", "6", "8"], "ans": 2}, {"id": "ex7-t2-psda-e2", "d": 1, "type": "mcq", "calc": false, "skill": "STAT", "q": "A laptop priced at $800 is discounted by 15%. What is the sale price?", "choices": ["$640", "$660", "$680", "$720"], "ans": 2}, {"id": "ex7-t2-psda-e3", "d": 1, "type": "mcq", "calc": false, "skill": "STAT", "q": "A population grew from 4,000 to 5,200. What is the percentage increase?", "choices": ["23%", "28%", "30%", "35%"], "ans": 2}, {"id": "ex7-t2-psda-stat0", "d": 1, "type": "mcq", "calc": false, "skill": "STAT", "q": "A data set is: 2, 4, 6, 8, 10, 10. What is the median?", "choices": ["6", "7", "8", "10"], "ans": 1}, {"id": "ex7-t2-psda-m1", "d": 3, "type": "mcq", "calc": true, "skill": "STAT", "q": "What is the mean, and which measure of central tendency is most affected if 30 is replaced by 80?", "choices": ["Mean = 19.1; the mean is most affected", "Mean = 19.1; the median is most affected", "Mean = 20; the mean is most affected", "Mean = 18; the median is most affected"], "ans": 0}, {"id": "ex7-t2-psda-stat3", "d": 5, "type": "mcq", "calc": true, "skill": "STAT", "q": "Which statement must be true?", "choices": ["Set A has more data points than Set B", "Set A's values are more spread out around the mean than Set B's", "Set A has a higher median than Set B", "Set B is impossible to achieve with a mean of 50"], "ans": 1}, {"id": "ex7-t2-psda-m2", "d": 3, "type": "mcq", "calc": true, "skill": "STAT", "q": "A bag has 4 red, 6 blue, and 2 yellow marbles. What is the probability of drawing a blue marble?", "choices": ["1/2", "1/3", "3/4", "2/3"], "ans": 0}, {"id": "ex7-t2-psda-m3", "d": 1, "type": "mcq", "calc": false, "skill": "STAT", "q": "A fair coin is flipped twice. What is the probability of getting exactly one head?", "choices": ["1/4", "1/2", "3/4", "1"], "ans": 1}, {"id": "ex7-t2-psda-h2", "d": 5, "type": "mcq", "calc": true, "skill": "STAT", "q": "What is the probability that both are red?", "choices": ["5/14", "25/64", "5/16", "10/28"], "ans": 0}, {"id": "ex7-t2-psda-tv1", "d": 5, "type": "mcq", "calc": true, "skill": "STAT", "q": "Which interpretation is most accurate?", "choices": ["Each $1,000 spent on advertising causes exactly $8,500 increase in sales", "There is a strong positive association; the model predicts $8,500 more in sales for each additional $1,000 in advertising, on average", "Advertising spend explains 88% of all variation in sales", "When advertising spend is $0, sales are always $120,000"], "ans": 1}, {"id": "ex7-t2-psda-tv2", "d": 1, "type": "mcq", "calc": false, "skill": "STAT", "q": "What does the model predict for y when x = 20?", "choices": ["30", "40", "50", "60"], "ans": 1}, {"id": "ex7-t2-psda-tv3", "d": 3, "type": "mcq", "calc": true, "skill": "STAT", "q": "Which statement is best supported?", "choices": ["Exercise causes BMI to decrease", "There is a very strong negative association between hours of exercise and BMI", "r = −0.92 means exercise explains 92% of BMI variation", "People who exercise more always have lower BMI"], "ans": 1}, {"id": "ex7-t2-samp-e1", "d": 1, "type": "mcq", "calc": false, "skill": "STAT", "q": "What is the most significant limitation of this sampling method?", "choices": ["600 is too small a sample for any conclusions", "The sample excludes commuters who do not use the train station, potentially biasing results toward longer commutes", "Commute time cannot be measured accurately by survey", "The city is too large for this method to be valid"], "ans": 1}, {"id": "ex7-t2-samp-m1", "d": 3, "type": "mcq", "calc": true, "skill": "STAT", "q": "Which of the following conclusions is valid from this design?", "choices": ["Any yield difference must be due to soil quality differences between groups", "Because plots are identical and assignment is random, any observed yield difference can be attributed to the fertiliser", "The study proves the new fertiliser is better for all crops worldwide", "The study would need at least 1,000 plots to be statistically valid"], "ans": 1}, {"id": "ex7-t2-samp-h1", "d": 5, "type": "mcq", "calc": true, "skill": "STAT", "q": "Which statement is most accurately supported?", "choices": ["Exactly 63% of all adults support the policy", "We can be 95% confident that between 60.5% and 65.5% of all adults support the policy", "95% of adults surveyed supported the policy", "The poll will be exactly right 95% of the time it is conducted"], "ans": 1}, {"id": "ex7-t2-geo-e1", "d": 1, "type": "mcq", "calc": false, "skill": "GEO", "q": "A triangle has base 14 cm and height 9 cm. What is its area?", "choices": ["49 cm²", "63 cm²", "126 cm²", "126 cm"], "ans": 1}, {"id": "ex7-t2-geo-e2", "d": 1, "type": "mcq", "calc": false, "skill": "GEO", "q": "A rectangular box has length 5 cm, width 4 cm, and height 3 cm. What is its volume?", "choices": ["47 cm³", "60 cm³", "94 cm³", "120 cm³"], "ans": 1}, {"id": "ex7-t2-geo-m1", "d": 3, "type": "mcq", "calc": true, "skill": "GEO", "q": "Two angles of a triangle are 40° and 75°. What is the exterior angle at the third vertex?", "choices": ["65°", "105°", "115°", "145°"], "ans": 2}, {"id": "ex7-t2-geo-ta2", "d": 1, "type": "mcq", "calc": false, "skill": "GEO", "q": "A straight line is crossed by a transversal creating co-interior (same-side interior) angles. One angle is 112°. What is the other?", "choices": ["68°", "112°", "58°", "22°"], "ans": 0}, {"id": "ex7-t2-geo-ta3", "d": 5, "type": "mcq", "calc": true, "skill": "GEO", "q": "What is the measure of angle BAC?", "choices": ["50°", "65°", "75°", "80°"], "ans": 1}, {"id": "ex7-t2-geo-m2", "d": 3, "type": "mcq", "calc": true, "skill": "GEO", "q": "What is the length of the side adjacent to angle A? (cos 36° ≈ 0.809)", "choices": ["11.8 cm", "14.2 cm", "16.2 cm", "18.0 cm"], "ans": 2}, {"id": "ex7-t2-geo-m3", "d": 3, "type": "mcq", "calc": true, "skill": "GEO", "q": "A circle has circumference 18π cm. What is its area?", "choices": ["81π cm²", "36π cm²", "9π cm²", "324π cm²"], "ans": 0}, {"id": "ex7-t2-geo-h1", "d": 5, "type": "mcq", "calc": true, "skill": "GEO", "q": "Circle: (x + 2)² + (y − 5)² = 36. What is the centre and radius?", "choices": ["Centre (2, −5), radius 6", "Centre (−2, 5), radius 6", "Centre (−2, 5), radius 36", "Centre (2, −5), radius 36"], "ans": 1}, {"id": "ex7-t2-geo-h2", "d": 5, "type": "mcq", "calc": true, "skill": "GEO", "q": "In a 30-60-90 triangle, the hypotenuse is 10. What is the length of the side opposite the 60° angle?", "choices": ["5", "5√2", "5√3", "10√3"], "ans": 2}, {"id": "ex7-t2-geo-rt2", "d": 1, "type": "mcq", "calc": false, "skill": "GEO", "q": "A 45-45-90 triangle has legs of length 9. What is the hypotenuse?", "choices": ["9√2", "9√3", "18", "81"], "ans": 0}, {"id": "ex7-t2-geo-rt3", "d": 3, "type": "mcq", "calc": true, "skill": "GEO", "q": "A flagpole casts a shadow 12 m long. The angle of elevation from the tip of the shadow to the top of the pole is 30°. How tall is the flagpole?", "choices": ["4√3 m", "6√3 m", "4√3 m", "12/√3 m"], "ans": 0}, {"id": "ex7-t2-geo-trig2", "d": 5, "type": "mcq", "calc": true, "skill": "GEO", "q": "If cos(θ) = −3/5 and θ is in the second quadrant, what is sin(θ)?", "choices": ["4/5", "−4/5", "3/5", "5/4"], "ans": 0}, {"id": "ex7-t2-geo-trig3", "d": 3, "type": "mcq", "calc": true, "skill": "GEO", "q": "What is the value of sin(90° − θ)?", "choices": ["sin(θ)", "cos(θ)", "−sin(θ)", "tan(θ)"], "ans": 1}, {"id": "ex7-t2-spr-lin-e1", "d": 1, "type": "spr", "calc": false, "skill": "ALG", "q": "If 6x − 5 = 31, what is x?", "ans_spr": "6"}, {"id": "ex7-t2-spr-lin-m1", "d": 3, "type": "spr", "calc": true, "skill": "ALG", "q": "If (3x − 1)/4 = 5, what is x?", "ans_spr": "7"}, {"id": "ex7-t2-spr-lin-h1", "d": 5, "type": "spr", "calc": true, "skill": "ALG", "q": "If 4x + y = 19 and 2x − y = 5, what is x + y?", "ans_spr": "7"}, {"id": "ex7-t2-spr-quad-e1", "d": 1, "type": "spr", "calc": false, "skill": "ALG", "q": "What is the positive solution to x² − 25 = 0?", "ans_spr": "5"}, {"id": "ex7-t2-spr-quad-m1", "d": 3, "type": "spr", "calc": true, "skill": "ALG", "q": "What is the product of the roots of 3x² − 6x + 2 = 0?", "ans_spr": "2/3"}, {"id": "ex7-t2-spr-quad-h1", "d": 5, "type": "spr", "calc": true, "skill": "ALG", "q": "If x² − 10x + k = 0 has exactly one real solution, what is k?", "ans_spr": "25"}, {"id": "ex7-t2-spr-geo-e1", "d": 1, "type": "spr", "calc": false, "skill": "GEO", "q": "A right triangle has legs 9 and 12. What is the hypotenuse?", "ans_spr": "15"}, {"id": "ex7-t2-spr-geo-m1", "d": 3, "type": "spr", "calc": true, "skill": "GEO", "q": "A circle has circumference 10π. What is its area in terms of π?", "ans_spr": "25π"}, {"id": "ex7-t2-spr-geo-h1", "d": 5, "type": "spr", "calc": true, "skill": "GEO", "q": "In a right triangle, tan(θ) = 7/24. What is sin(θ)?", "ans_spr": "7/25"}, {"id": "ex7-t2-spr-psda-e1", "d": 1, "type": "spr", "calc": false, "skill": "STAT", "q": "A printer prints 40 pages in 5 minutes. How many pages in 12 minutes?", "ans_spr": "96"}, {"id": "ex7-t2-spr-psda-m1", "d": 3, "type": "spr", "calc": true, "skill": "STAT", "q": "After a 20% increase followed by a 20% decrease, what percentage of the original value remains?", "ans_spr": "96"}, {"id": "ex7-t2-spr-psda-h1", "d": 5, "type": "spr", "calc": true, "skill": "STAT", "q": "Six numbers have a mean of 15. If one number is removed and the new mean is 14, what was the removed number?", "ans_spr": "20"}];
+
+// ═══════════════════════════════════════════════════
+// REAL SAT MODULE TEMPLATE (27 questions per R&W module)
+// Order mirrors actual SAT Adaptive Exam 1 structure:
+//   Q1-3:   WIC  (Words in Context)           — Craft & Structure
+//   Q4-5:   TSP  (Text Structure & Purpose)   — Craft & Structure
+//   Q6-7:   CT   (Cross-Text Connections)     — Craft & Structure
+//   Q8-12:  CI   (Central Ideas / CoE)        — Information & Ideas
+//   Q13-17: INF  (Inferences)                 — Information & Ideas
+//   Q18-22: SEC  (Standard English Conv.)     — SEC
+//   Q23-25: TRN  (Transitions)                — Expression of Ideas
+//   Q26-27: RS   (Rhetorical Synthesis)       — Expression of Ideas
+// ═══════════════════════════════════════════════════
+
+const MODULE_TEMPLATE = [
+  {type:'WIC', count:3},
+  {type:'TSP', count:2},
+  {type:'CT',  count:2},
+  {type:'CI',  count:5},
+  {type:'INF', count:5},
+  {type:'SEC', count:5},
+  {type:'TRN', count:3},
+  {type:'RS',  count:2},
+];
+
+const DOMAIN_MAP = {
+  WIC:'Craft & Structure', TSP:'Craft & Structure', CT:'Craft & Structure',
+  CI:'Information & Ideas', INF:'Information & Ideas',
+  SEC:'Standard English Conventions',
+  TRN:'Expression of Ideas', RS:'Expression of Ideas'
+};
+const DOMAIN_CLASS = {
+  WIC:'reading', TSP:'reading', CT:'reading',
+  CI:'reading', INF:'reading',
+  SEC:'writing', TRN:'writing', RS:'writing'
+};
+const TYPE_LABELS = {
+  WIC:'Words in Context', TSP:'Text Structure & Purpose', CT:'Cross-Text Connections',
+  CI:'Information & Ideas', INF:'Inferences',
+  SEC:'Standard English', TRN:'Transitions', RS:'Rhetorical Synthesis'
+};
+
+// ═══════════════════════════════════════════════════
+// STATE
+// ═══════════════════════════════════════════════════
+const STATE = {
+  moduleIndex: 0,
+  modules: [null,null,null,null],
+  answers: {},
+  studentName: '',
+  startTime: null,
+  flags: {},
+  timerInterval: null,
+  secondsLeft: 0,
+  breakInterval: null,
+  results: {v1:0,v2:0,m1:0,m2:0},
+  currentQ: 0
+};
+
+const MODULE_CFG = [
+  {name:'Reading & Writing', sub:'MODULE 1',            qs:27, mins:32, calc:false, type:'verbal'},
+  {name:'Reading & Writing', sub:'MODULE 2 — Adaptive', qs:27, mins:32, calc:false, type:'verbal'},
+  {name:'Mathematics',       sub:'MODULE 1',            qs:22, mins:35, calc:false, type:'math'},
+  {name:'Mathematics',       sub:'MODULE 2 — Adaptive', qs:22, mins:35, calc:true,  type:'math'},
+];
+
+// ═══════════════════════════════════════════════════
+// UTILITIES
+// ═══════════════════════════════════════════════════
+function shuffle(arr){const a=[...arr];for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
+function show(id){document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));document.getElementById(id).classList.add('active');}
+
+// ═══════════════════════════════════════════════════
+// BUILD VERBAL MODULE — respects real SAT question order
+// ═══════════════════════════════════════════════════
+function buildVerbalModule(bias, exclude) {
+  const excSet = new Set((exclude||[]).map(q=>q.id));
+  const pool = VERBAL.filter(q=>!excSet.has(q.id));
+
+  // Difficulty weight maps
+  const weights = {
+    easy:  {1:6,2:5,3:3,4:1,5:0},
+    medium:{1:2,2:4,3:5,4:4,5:2},
+    hard:  {1:0,2:1,3:3,4:5,5:6}
+  };
+  const w = weights[bias]||weights.medium;
+
+  // For each slot in template, pick from the right type with difficulty weighting
+  const result = [];
+  const used = new Set();
+
+  for (const slot of MODULE_TEMPLATE) {
+    const candidates = shuffle(pool.filter(q=>q.type===slot.type && !used.has(q.id)));
+
+    // build weighted list from candidates
+    let weighted = [];
+    candidates.forEach(q=>{const wt=w[q.d]||0;for(let i=0;i<wt;i++)weighted.push(q);});
+    weighted = shuffle(weighted);
+
+    // de-dup
+    const seen = new Set();
+    const deduped = [];
+    for(const q of weighted){if(!seen.has(q.id)){seen.add(q.id);deduped.push(q);}}
+
+    // fill remaining from unweighted if needed
+    for(const q of candidates){if(!seen.has(q.id)){deduped.push(q);seen.add(q.id);}}
+
+    let picked = 0;
+    for(const q of deduped){
+      if(picked>=slot.count) break;
+      result.push(q);
+      used.add(q.id);
+      picked++;
+    }
+    // if we couldn't fill (shouldn't happen with our bank), skip gracefully
+  }
+
+  return result;
+}
+
+// ═══════════════════════════════════════════════════
+// BUILD MATH MODULE
+// ═══════════════════════════════════════════════════
+function buildMathModule(bias, exclude, allowCalc) {
+  const excSet = new Set((exclude||[]).map(q=>q.id));
+  let pool = MATH.filter(q=>!excSet.has(q.id));
+  if(!allowCalc) pool = pool.filter(q=>!q.calc);
+
+  const weights={easy:{1:6,2:5,3:3,4:1,5:0},medium:{1:2,2:4,3:5,4:4,5:2},hard:{1:0,2:1,3:3,4:5,5:6}};
+  const w=weights[bias]||weights.medium;
+
+  let weighted=[];
+  pool.forEach(q=>{const wt=w[q.d]||0;for(let i=0;i<wt;i++)weighted.push(q);});
+  weighted=shuffle(weighted);
+
+  const result=[];const used=new Set();
+  for(const q of weighted){if(result.length>=22)break;if(!used.has(q.id)){result.push(q);used.add(q.id);}}
+  for(const q of shuffle(pool)){if(result.length>=22)break;if(!used.has(q.id)){result.push(q);used.add(q.id);}}
+  return result.slice(0,22);
+}
+
+function scoreModule(questions,answers){
+  let c=0;
+  questions.forEach(q=>{
+    const a=answers[q.id];
+    if(q.type==='spr'){if(a!==undefined&&a!==''&&String(a).trim().toLowerCase()===String(q.ans_spr).trim().toLowerCase())c++;}
+    else{if(a===q.ans)c++;}
+  });
+  return c;
+}
+
+// ═══════════════════════════════════════════════════
+// FLOW CONTROL
+// ═══════════════════════════════════════════════════
+function startExam(){
+  // capture student name
+  const nameEl = document.getElementById('student-name');
+  const nameVal = nameEl ? nameEl.value.trim() : '';
+  STATE.studentName = nameVal || 'Anonymous';
+  STATE.startTime = Date.now();
+  STATE.modules[0]=buildVerbalModule('medium',[]);
+  STATE.modules[2]=buildMathModule('medium',[],false);
+  STATE.moduleIndex=0;
+  showModIntro(0);
+}
+
+function showModIntro(idx){
+  const cfg=MODULE_CFG[idx];
+  document.getElementById('mi-badge').textContent=`Module ${idx+1} of 4`;
+  document.getElementById('mi-title').textContent=cfg.name;
+  document.getElementById('mi-sub').textContent=cfg.sub;
+  document.getElementById('mi-qs').textContent=cfg.qs;
+  document.getElementById('mi-time').textContent=cfg.mins+' min';
+  document.getElementById('mi-calc-note').style.display=cfg.calc?'block':'none';
+
+  // domain strip for verbal modules
+  const strip=document.getElementById('mi-domain-strip');
+  strip.innerHTML='';
+  if(cfg.type==='verbal'){
+    const domains=['Craft & Structure','Information & Ideas','Standard English','Expression of Ideas'];
+    domains.forEach((d,i)=>{
+      const tag=document.createElement('span');
+      tag.className='domain-tag '+(i<2?'reading':'writing');
+      tag.textContent=d;
+      strip.appendChild(tag);
+    });
+  }
+  show('mod-intro');
+}
+
+function beginModule(){
+  const idx=STATE.moduleIndex;
+  if(idx===1){
+    const s=scoreModule(STATE.modules[0],STATE.answers);
+    const bias=s>=20?'hard':s>=12?'medium':'easy';
+    STATE.modules[1]=buildVerbalModule(bias,STATE.modules[0]);
+  }
+  if(idx===3){
+    const s=scoreModule(STATE.modules[2],STATE.answers);
+    const bias=s>=16?'hard':s>=9?'medium':'easy';
+    STATE.modules[3]=buildMathModule(bias,STATE.modules[2],true);
+  }
+  STATE.currentQ=0;
+  startTimer();
+  renderExam();
+  show('exam');
+}
+
+// ═══════════════════════════════════════════════════
+// TIMER
+// ═══════════════════════════════════════════════════
+function startTimer(){
+  clearInterval(STATE.timerInterval);
+  STATE.secondsLeft=MODULE_CFG[STATE.moduleIndex].mins*60;
+  document.getElementById('timer-display').classList.remove('warn');
+  updateTimerDisplay();
+  STATE.timerInterval=setInterval(()=>{
+    STATE.secondsLeft--;updateTimerDisplay();
+    if(STATE.secondsLeft===300)document.getElementById('timer-display').classList.add('warn');
+    if(STATE.secondsLeft<=0){clearInterval(STATE.timerInterval);autoSubmit();}
+  },1000);
+}
+function updateTimerDisplay(){
+  const m=Math.floor(STATE.secondsLeft/60),s=STATE.secondsLeft%60;
+  document.getElementById('timer-display').textContent=String(m).padStart(2,'0')+':'+String(s).padStart(2,'0');
+}
+function autoSubmit(){submitModule(true);}
+
+// ═══════════════════════════════════════════════════
+// RENDER EXAM
+// ═══════════════════════════════════════════════════
+function renderExam(){
+  const idx=STATE.moduleIndex;
+  const cfg=MODULE_CFG[idx];
+  const mod=STATE.modules[idx];
+  const q=mod[STATE.currentQ];
+  document.getElementById('hdr-label').innerHTML=cfg.name+`<span>${cfg.sub}</span>`;
+  document.getElementById('hdr-qcount').textContent=(STATE.currentQ+1)+' / '+mod.length;
+  const cb=document.getElementById('calc-toggle-btn');
+  if(cfg.calc)cb.classList.remove('hidden');
+  else{cb.classList.add('hidden');document.getElementById('calc-overlay').classList.remove('open');}
+  renderQuestion(q,mod);
+  renderPalette(mod);
+}
+
+function renderQuestion(q,mod){
+  const panel=document.getElementById('q-panel');
+  const isFlagged=STATE.flags[q.id]||false;
+  const isLast=STATE.currentQ===mod.length-1;
+
+  // Domain badge
+  const domClass=DOMAIN_CLASS[q.type]||'reading';
+  const domLabel=DOMAIN_MAP[q.type]||q.type;
+  const typeLabel=TYPE_LABELS[q.type]||q.type;
+  let domBadge=`<div class="domain-badge ${domClass}">${domLabel} · ${typeLabel}</div>`;
+
+  // Passage / notes box
+  let contentHtml='';
+  if(q.type==='RS'){
+    // Rhetorical synthesis: bulleted notes format
+    const lines=q.passage.split('\n');
+    const intro=lines[0];
+    const bullets=lines.filter(l=>l.startsWith('•'));
+    contentHtml=`<div class="notes-box">
+      <div class="notes-intro">${intro}</div>
+      <ul>${bullets.map(b=>`<li>${b.replace('• ','')}</li>`).join('')}</ul>
+    </div>`;
+  } else if(q.passage){
+    let pt=q.passage;
+    if(pt.includes('Text 1:')){
+      pt=pt.replace('Text 1:','<span class="t1-label">Text 1</span>').replace('Text 2:','<span class="t2-label">Text 2</span>');
+    }
+    contentHtml=`<div class="passage-box">${pt.replace(/\n/g,'<br>')}</div>`;
+  }
+
+  // Answer input — all verbal are MCQ
+  const letters=['A','B','C','D'];
+  let inputHtml='<div class="choices">';
+  (q.choices||[]).forEach((c,i)=>{
+    const sel=STATE.answers[q.id]===i?'selected':'';
+    inputHtml+=`<button class="choice-btn ${sel}" onclick="selectChoice('${q.id}',this,${i})">
+      <span class="choice-letter">${letters[i]}</span><span>${c}</span></button>`;
+  });
+  inputHtml+='</div>';
+
+  // Math SPR
+  if(q.type==='spr'){
+    const cur=STATE.answers[q.id]!==undefined?String(STATE.answers[q.id]):'';
+    inputHtml=`<div style="margin-bottom:28px">
+      <input style="border:2px solid var(--gray1);border-radius:10px;padding:14px 18px;font-size:18px;font-family:'JetBrains Mono',monospace;color:var(--text);outline:none;width:100%;max-width:300px;display:block;transition:border .15s" 
+        id="spr-inp" type="text" placeholder="Your answer…"
+        value="${cur.replace(/"/g,'&quot;')}"
+        oninput="saveSPR('${q.id}',this.value)"
+        onfocus="this.style.borderColor='var(--gold)'"
+        onblur="this.style.borderColor='var(--gray1)'">
+      <div style="font-size:12px;color:var(--gray3);margin-top:8px;font-style:italic;font-family:'JetBrains Mono',monospace">Fractions (1/2), decimals (0.5), and whole numbers accepted.</div>
+    </div>`;
+  }
+
+  const prevBtn=STATE.currentQ>0?`<button class="btn-nav btn-prev" onclick="goQ(-1)">← Back</button>`:'';
+  const nextBtn=isLast
+    ?`<button class="btn-nav btn-submit-mod" onclick="showReview()">Review &amp; Submit →</button>`
+    :`<button class="btn-nav btn-next" onclick="goQ(1)">Next →</button>`;
+
+  panel.innerHTML=`
+    ${domBadge}
+    <div class="q-number">Question ${STATE.currentQ+1} of ${mod.length}</div>
+    ${contentHtml}
+    <div class="q-text">${q.q}</div>
+    ${inputHtml}
+    <div class="nav-row">
+      ${prevBtn}${nextBtn}
+      <button class="flag-btn ${isFlagged?'flagged':''}" onclick="toggleFlag('${q.id}',this)">
+        ${isFlagged?'⚑ Flagged':'⚐ Flag'}
+      </button>
+    </div>`;
+}
+
+// ═══════════════════════════════════════════════════
+// INTERACTIONS
+// ═══════════════════════════════════════════════════
+function selectChoice(id,btn,idx){
+  STATE.answers[id]=idx;
+  document.querySelectorAll('.choice-btn').forEach(b=>b.classList.remove('selected'));
+  btn.classList.add('selected');
+  renderPalette(STATE.modules[STATE.moduleIndex]);
+}
+function saveSPR(id,val){STATE.answers[id]=val;renderPalette(STATE.modules[STATE.moduleIndex]);}
+function toggleFlag(id,btn){
+  STATE.flags[id]=!STATE.flags[id];
+  btn.classList.toggle('flagged');
+  btn.textContent=STATE.flags[id]?'⚑ Flagged':'⚐ Flag';
+  renderPalette(STATE.modules[STATE.moduleIndex]);
+}
+function goQ(dir){STATE.currentQ+=dir;renderExam();document.getElementById('q-panel').scrollTop=0;}
+
+function renderPalette(mod){
+  const grid=document.getElementById('palette-grid');
+  grid.innerHTML='';
+  mod.forEach((q,i)=>{
+    const btn=document.createElement('button');
+    btn.className='pal-btn';
+    btn.textContent=i+1;
+    if(STATE.answers[q.id]!==undefined&&STATE.answers[q.id]!=='')btn.classList.add('answered');
+    if(STATE.flags[q.id])btn.classList.add('flagged');
+    if(i===STATE.currentQ)btn.classList.add('current');
+    btn.onclick=()=>{STATE.currentQ=i;renderExam();};
+    grid.appendChild(btn);
+  });
+}
+
+// ═══════════════════════════════════════════════════
+// REVIEW
+// ═══════════════════════════════════════════════════
+function showReview(){
+  clearInterval(STATE.timerInterval);
+  const mod=STATE.modules[STATE.moduleIndex];
+  let ans=0,unans=0,flag=0;
+  mod.forEach(q=>{
+    const a=STATE.answers[q.id];
+    if(a!==undefined&&a!=='')ans++;else unans++;
+    if(STATE.flags[q.id])flag++;
+  });
+  document.getElementById('rev-answered').textContent=ans;
+  document.getElementById('rev-unanswered').textContent=unans;
+  document.getElementById('rev-flagged').textContent=flag;
+  document.getElementById('rev-sub').textContent=MODULE_CFG[STATE.moduleIndex].sub;
+  const list=document.getElementById('review-list');
+  list.innerHTML='';
+  mod.forEach((q,i)=>{
+    const answered=STATE.answers[q.id]!==undefined&&STATE.answers[q.id]!=='';
+    const flagged=STATE.flags[q.id];
+    const status=flagged?'flag':(answered?'ans':'unans');
+    const labels={flag:'Flagged',ans:'Answered',unans:'Not answered'};
+    const el=document.createElement('div');el.className='rev-item';
+    el.innerHTML=`<span class="ri-num">Q${i+1}</span>
+      <span class="ri-status ${status}">${labels[status]}</span>
+      <span class="ri-text">${q.q.substring(0,60)}…</span>`;
+    el.onclick=()=>{STATE.currentQ=i;goBackToExam();};
+    list.appendChild(el);
+  });
+  show('review');
+}
+function goBackToExam(){startTimer();renderExam();show('exam');}
+function confirmSubmitModule(){submitModule(false);}
+
+// ═══════════════════════════════════════════════════
+// SUBMIT
+// ═══════════════════════════════════════════════════
+function submitModule(auto){
+  clearInterval(STATE.timerInterval);
+  document.getElementById('calc-overlay').classList.remove('open');
+  const idx=STATE.moduleIndex;
+  const score=scoreModule(STATE.modules[idx],STATE.answers);
+  const keys=['v1','v2','m1','m2'];
+  STATE.results[keys[idx]]=score;
+  STATE.moduleIndex++;
+  if(STATE.moduleIndex>=4){showResults();return;}
+  if(STATE.moduleIndex===2){startBreak();return;}
+  showModIntro(STATE.moduleIndex);
+}
+
+// ═══════════════════════════════════════════════════
+// BREAK
+// ═══════════════════════════════════════════════════
+function startBreak(){
+  let secs=600;
+  const el=document.getElementById('break-timer');
+  const fmt=s=>`${Math.floor(s/60)}:${String(s%60).padStart(2,'0')}`;
+  el.textContent=fmt(secs);
+  STATE.breakInterval=setInterval(()=>{
+    secs--;el.textContent=fmt(secs);
+    if(secs<=0){clearInterval(STATE.breakInterval);endBreak();}
+  },1000);
+  show('break-screen');
+}
+function endBreak(){clearInterval(STATE.breakInterval);showModIntro(STATE.moduleIndex);}
+function toggleCalc(){if(!MODULE_CFG[STATE.moduleIndex].calc)return;document.getElementById('calc-overlay').classList.toggle('open');}
+
+// ═══════════════════════════════════════════════════
+// RESULTS
+// ═══════════════════════════════════════════════════
+function showResults(){
+  const r=STATE.results;
+  const vPct=(r.v1/27+r.v2/27)/2;
+  const mPct=(r.m1/22+r.m2/22)/2;
+  const vScore=Math.round(200+vPct*600);
+  const mScore=Math.round(200+mPct*600);
+  const totalScore=vScore+mScore;
+  document.getElementById('res-verbal').textContent=vScore;
+  document.getElementById('res-math').textContent=mScore;
+  document.getElementById('res-total').textContent=totalScore;
+  // Provisional estimated-range caveat, NOT a recalibrated score — see
+  // SCORING_CALIBRATION note. Offsets are illustrative placeholders pending
+  // real comparison data (College Board's exact formula is confidential and
+  // unpublished); revisit once enough real-score data points accumulate.
+  const rangeLow=Math.max(400, totalScore-240);
+  const rangeHigh=Math.max(rangeLow+20, totalScore-40);
+  document.getElementById('res-range').textContent=rangeLow+' – '+rangeHigh;
+  document.getElementById('res-v1').textContent=`${r.v1}/27`;
+  document.getElementById('res-v2').textContent=`${r.v2}/27`;
+  document.getElementById('res-m1').textContent=`${r.m1}/22`;
+  document.getElementById('res-m2').textContent=`${r.m2}/22`;
+
+  const det=document.getElementById('results-detail');
+  det.innerHTML='';
+  const sections=[
+    {label:'Reading & Writing — Module 1',mod:0,total:27},
+    {label:'Reading & Writing — Module 2',mod:1,total:27},
+    {label:'Mathematics — Module 1',mod:2,total:22},
+    {label:'Mathematics — Module 2',mod:3,total:22},
+  ];
+  sections.forEach(sec=>{
+    if(!STATE.modules[sec.mod])return;
+    const secScore=STATE.results[['v1','v2','m1','m2'][sec.mod]];
+    const div=document.createElement('div');div.className='review-section';
+    const skillMap={};
+    let html=`<h3>${sec.label}<span class="rs-score">${secScore} / ${sec.total}</span></h3>`;
+    STATE.modules[sec.mod].forEach((q,i)=>{
+      const a=STATE.answers[q.id];
+      let correct=false;
+      if(q.type==='spr'){correct=a!==undefined&&a!==''&&String(a).trim().toLowerCase()===String(q.ans_spr).trim().toLowerCase();}
+      else{correct=a===q.ans;}
+      const skipped=a===undefined||a==='';
+      const icon=skipped?'skip':(correct?'correct':'wrong');
+      const icons={correct:'✓',wrong:'✗',skip:'–'};
+      const letters=['A','B','C','D'];
+      if(!skillMap[q.type])skillMap[q.type]={c:0,t:0};
+      skillMap[q.type].t++;if(correct)skillMap[q.type].c++;
+      let yourAns='—',corrAns='';
+      if(q.type==='spr'){yourAns=skipped?'—':a;corrAns=q.ans_spr;}
+      else if(q.choices){yourAns=skipped?'—':letters[a];corrAns=letters[q.ans];}
+      html+=`<div class="ans-item">
+        <div class="ans-icon ${icon}">${icons[icon]}</div>
+        <div class="ans-text">
+          <div class="at-q">Q${i+1} [${TYPE_LABELS[q.type]||q.type}]: ${q.q.substring(0,75)}…</div>
+          <div class="at-r">
+            Your answer: <span class="${skipped?'':'wr'}">${yourAns}</span>
+            ${!correct&&!skipped?` · Correct: <span class="cor">${corrAns}</span>`:''}
+            ${correct?` · <span class="cor">Correct ✓</span>`:''}
+            ${skipped?` · Correct: <span class="cor">${corrAns}</span>`:''}
+          </div>
+        </div>
+      </div>`;
+    });
+    html+='<div class="skill-breakdown">';
+    Object.entries(skillMap).forEach(([sk,{c,t}])=>{
+      html+=`<div class="skill-pill">${TYPE_LABELS[sk]||sk}: <span>${c}/${t}</span></div>`;
+    });
+    html+='</div>';
+    div.innerHTML=html;det.appendChild(div);
+  });
+  // ── Syra → Google Sheets silent submission ──────────────────
+  (function(){
+    try {
+      const allSkills = {};
+      STATE.modules.forEach(mod => {
+        if(!mod) return;
+        mod.forEach(q => {
+          const a = STATE.answers[q.id];
+          let ok = q.type==='spr'
+            ? (a!==undefined && a!=='' && String(a).trim().toLowerCase()===String(q.ans_spr).trim().toLowerCase())
+            : (a === q.ans);
+          if(!allSkills[q.type]) allSkills[q.type] = {c:0,t:0};
+          allSkills[q.type].t++;
+          if(ok) allSkills[q.type].c++;
+        });
+      });
+
+      const weakList = Object.entries(allSkills)
+        .filter(([,{c,t}]) => c/t < 0.6)
+        .map(([sk,{c,t}]) => (TYPE_LABELS[sk]||sk)+': '+c+'/'+t)
+        .join(', ') || 'All areas strong';
+
+      const examNum = '7';
+      const secs    = STATE.startTime ? Math.round((Date.now()-STATE.startTime)/1000) : 0;
+      const timeMins= Math.round(secs/60);
+      const today   = new Date();
+      const dateStr = today.getDate()+'/'+(today.getMonth()+1)+'/'+today.getFullYear();
+
+      const body = new URLSearchParams({
+        'entry.2020134311': STATE.studentName || 'Anonymous',
+        'entry.596818200':  examNum,
+        'entry.1385257217': String(vScore),
+        'entry.1082196700': String(mScore),
+        'entry.967537875':  String(vScore+mScore),
+        'entry.1294352295': weakList,
+        'entry.1010465348': dateStr,
+        'entry.398063087':  String(timeMins)
+      });
+      fetch('https://docs.google.com/forms/d/e/1FAIpQLSfP1NY92T_CPpVbapAykMWP6zUQKJpX-zjIedmiCEKWNEmETQ/formResponse', {method:'POST', mode:'no-cors', body:body}).catch(()=>{});
+    } catch(e){}
+  })();
+  // ────────────────────────────────────────────────────────────
+  show('results');
+}
+</script>
+</body>
+</html>
